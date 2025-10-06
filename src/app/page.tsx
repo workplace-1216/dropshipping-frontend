@@ -23,7 +23,7 @@ import {
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,6 +31,11 @@ export default function Home() {
       router.push('/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // This effect will trigger re-render when currentLanguage changes
+  }, [currentLanguage]);
 
   if (isLoading) {
     return (
@@ -101,9 +106,9 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Welcome to{' '}
+            {t('home.welcomeTo')}{' '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Workana Hourly
+              {t('home.workanaHourly')}
             </span>
           </motion.h1>
           <motion.p 
@@ -112,7 +117,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
           >
-            A comprehensive dropshipping and marketplace platform connecting sellers and buyers worldwide.
+            {t('home.subtitle')}
           </motion.p>
           <motion.div 
             className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8 space-y-3 sm:space-y-0 sm:space-x-3"
@@ -122,7 +127,7 @@ export default function Home() {
           >
             <GradientButton size="lg" onClick={() => router.push('/register')} className="cursor-pointer">
               <span className="flex items-center">
-                Get Started <ArrowRight className="w-4 h-4 ml-2" />
+                {t('home.getStarted')} <ArrowRight className="w-4 h-4 ml-2" />
               </span>
             </GradientButton>
           </motion.div>
@@ -141,28 +146,28 @@ export default function Home() {
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-4">
                   <ShoppingCart className="w-6 h-6 text-white" />
                 </div>
-                <CardTitle>For Sellers</CardTitle>
+                <CardTitle>{t('home.forSellers')}</CardTitle>
                 <CardDescription>
-                  List your products and reach customers worldwide
+                  {t('home.sellersDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Easy product management</span>
+                    <span>{t('home.easyProductManagement')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Order tracking</span>
+                    <span>{t('home.orderTracking')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Analytics dashboard</span>
+                    <span>{t('home.analyticsDashboard')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Secure payments</span>
+                    <span>{t('home.securePayments')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -173,28 +178,28 @@ export default function Home() {
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <CardTitle>For Buyers</CardTitle>
+                <CardTitle>{t('home.forBuyers')}</CardTitle>
                 <CardDescription>
-                  Discover and purchase products from verified sellers
+                  {t('home.buyersDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Wide product selection</span>
+                    <span>{t('home.wideProductSelection')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Secure checkout</span>
+                    <span>{t('home.secureCheckout')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Order history</span>
+                    <span>{t('home.orderHistory')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Customer support</span>
+                    <span>{t('home.customerSupport')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -205,28 +210,28 @@ export default function Home() {
                 <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
-                <CardTitle>Secure Platform</CardTitle>
+                <CardTitle>{t('home.securePlatform')}</CardTitle>
                 <CardDescription>
-                  Built with security and reliability in mind
+                  {t('home.securePlatformDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>JWT authentication</span>
+                    <span>{t('home.jwtAuthentication')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Data encryption</span>
+                    <span>{t('home.dataEncryption')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>Secure payments</span>
+                    <span>{t('home.securePayments')}</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>24/7 monitoring</span>
+                    <span>{t('home.monitoring247')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -242,8 +247,8 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 1.1 }}
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Trusted by Thousands</h2>
-            <p className="text-blue-100">Join our growing community of sellers and buyers</p>
+            <h2 className="text-3xl font-bold mb-4">{t('home.trustedByThousands')}</h2>
+            <p className="text-blue-100">{t('home.joinCommunity')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <motion.div 
@@ -253,7 +258,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1.2 }}
             >
               <div className="text-3xl font-bold">10K+</div>
-              <div className="text-blue-100">Active Users</div>
+              <div className="text-blue-100">{t('home.activeUsers')}</div>
             </motion.div>
             <motion.div 
               className="text-center"
@@ -262,7 +267,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1.3 }}
             >
               <div className="text-3xl font-bold">50K+</div>
-              <div className="text-blue-100">Products Listed</div>
+              <div className="text-blue-100">{t('home.productsListed')}</div>
             </motion.div>
             <motion.div 
               className="text-center"
@@ -271,7 +276,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1.4 }}
             >
               <div className="text-3xl font-bold">$2M+</div>
-              <div className="text-blue-100">Total Sales</div>
+              <div className="text-blue-100">{t('home.totalSales')}</div>
             </motion.div>
             <motion.div 
               className="text-center"
@@ -280,7 +285,7 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1.5 }}
             >
               <div className="text-3xl font-bold">99.9%</div>
-              <div className="text-blue-100">Uptime</div>
+              <div className="text-blue-100">{t('home.uptime')}</div>
             </motion.div>
           </div>
         </motion.div>

@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -106,13 +106,18 @@ export const AnimatedSidebar: React.FC<AnimatedSidebarProps> = ({
   isCollapsed,
   onToggle
 }) => {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const [activeItem, setActiveItem] = useState('dashboard');
 
   const filteredItems = sidebarItems.filter(item => 
     user?.role && item.roles.includes(user.role)
   );
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // This effect will trigger re-render when currentLanguage changes
+  }, [currentLanguage]);
 
   return (
     <motion.aside

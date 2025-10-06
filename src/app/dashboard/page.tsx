@@ -25,7 +25,7 @@ import {
 
 export default function Dashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -33,6 +33,11 @@ export default function Dashboard() {
       router.push('/login');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // This effect will trigger re-render when currentLanguage changes
+  }, [currentLanguage]);
 
   if (isLoading) {
     return (
@@ -93,16 +98,16 @@ export default function Dashboard() {
   ];
 
   const recentOrders = [
-    { id: '#1234', customer: 'John Doe', amount: 299.99, status: 'delivered', date: '2 hours ago' },
-    { id: '#1235', customer: 'Jane Smith', amount: 149.50, status: 'shipped', date: '4 hours ago' },
-    { id: '#1236', customer: 'Bob Johnson', amount: 89.99, status: 'processing', date: '6 hours ago' },
-    { id: '#1237', customer: 'Alice Brown', amount: 199.99, status: 'delivered', date: '8 hours ago' }
+    { id: '#1234', customer: 'John Doe', amount: 299.99, status: t('orders.delivered'), date: t('dashboard.time2hoursAgo') },
+    { id: '#1235', customer: 'Jane Smith', amount: 149.50, status: t('orders.shipped'), date: t('dashboard.time4hoursAgo') },
+    { id: '#1236', customer: 'Bob Johnson', amount: 89.99, status: t('orders.processing'), date: t('dashboard.time6hoursAgo') },
+    { id: '#1237', customer: 'Alice Brown', amount: 199.99, status: t('orders.delivered'), date: t('dashboard.time8hoursAgo') }
   ];
 
   const alerts = [
-    { type: 'warning', message: 'Low stock alert for Product #123', time: '5 min ago' },
-    { type: 'success', message: 'Payment processed successfully', time: '1 hour ago' },
-    { type: 'info', message: 'New customer registration', time: '2 hours ago' }
+    { type: 'warning', message: t('dashboard.lowStockAlert'), time: t('dashboard.time5minAgo') },
+    { type: 'success', message: t('dashboard.paymentProcessed'), time: t('dashboard.time1hourAgo') },
+    { type: 'info', message: t('dashboard.newCustomerRegistration'), time: t('dashboard.time2hoursAgo') }
   ];
 
   return (
@@ -121,7 +126,7 @@ export default function Dashboard() {
                 {t('dashboard.welcome')}, {user?.name || 'User'}! 👋
               </h1>
               <p className="mt-2 text-blue-100">
-                Here's what's happening with your {user?.role || 'account'} today.
+                {t('dashboard.welcomeSubtitle')} {user?.role || t('common.account')} {t('common.today')}.
               </p>
             </div>
             <motion.div
@@ -176,7 +181,7 @@ export default function Dashboard() {
                     }`}>
                       {Math.abs(kpi.change)}%
                     </span>
-                    <span className="text-sm text-gray-500 ml-1">vs last month</span>
+                    <span className="text-sm text-gray-500 ml-1">{t('dashboard.vsLastMonth')}</span>
                   </div>
                 </div>
               </AnimatedCard>
@@ -193,7 +198,7 @@ export default function Dashboard() {
                   {t('dashboard.recentOrders')}
                 </h3>
                 <GradientButton size="sm" variant="secondary" className="cursor-pointer">
-                  View All
+                  {t('dashboard.viewAll')}
                 </GradientButton>
               </div>
               <div className="space-y-4">

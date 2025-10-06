@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,20 +31,25 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
   onMenuToggle,
   isMobileMenuOpen
 }) => {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const { user, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const notifications = [
-    { id: 1, title: 'New order received', time: '2 min ago', unread: true },
-    { id: 2, title: 'Payment processed', time: '1 hour ago', unread: true },
-    { id: 3, title: 'Low stock alert', time: '3 hours ago', unread: false },
-    { id: 4, title: 'New message from customer', time: '5 hours ago', unread: false }
+    { id: 1, title: t('dashboard.newOrderReceived'), time: t('dashboard.time2minAgo'), unread: true },
+    { id: 2, title: t('dashboard.paymentProcessed'), time: t('dashboard.time1hourAgo'), unread: true },
+    { id: 3, title: t('dashboard.lowStockAlert'), time: t('dashboard.time3hoursAgo'), unread: false },
+    { id: 4, title: t('dashboard.newMessageFromCustomer'), time: t('dashboard.time5hoursAgo'), unread: false }
   ];
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
+  // Force re-render when language changes
+  useEffect(() => {
+    // This effect will trigger re-render when currentLanguage changes
+  }, [currentLanguage]);
 
   return (
     <motion.header
@@ -122,7 +127,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                   className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
                 >
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">{t('dashboard.notifications')}</h3>
                   </div>
                   <div className="max-h-64 overflow-y-auto">
                     {notifications.map((notification, index) => (
@@ -155,7 +160,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                   </div>
                   <div className="px-4 py-2 border-t border-gray-100">
                     <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                      View all notifications
+                      {t('dashboard.viewAllNotifications')}
                     </button>
                   </div>
                 </motion.div>
@@ -205,11 +210,11 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                   <div className="py-1">
                     <button className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                       <User className="w-4 h-4" />
-                      <span>Profile</span>
+                      <span>{t('nav.profile')}</span>
                     </button>
                     <button className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                       <Settings className="w-4 h-4" />
-                      <span>Settings</span>
+                      <span>{t('nav.settings')}</span>
                     </button>
                     <button 
                       onClick={logout}

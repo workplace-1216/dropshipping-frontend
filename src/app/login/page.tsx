@@ -50,6 +50,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Language Switcher */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="absolute top-6 right-6 z-10"
+      >
+        <LanguageSwitcher />
+      </motion.div>
+      
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <motion.div
@@ -75,15 +85,6 @@ export default function LoginPage() {
           </p>
         </motion.div>
 
-        {/* Language Switcher */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex justify-center"
-        >
-          <LanguageSwitcher />
-        </motion.div>
 
         {/* Login Form */}
         <motion.div

@@ -9,6 +9,7 @@ import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GradientButton } from '@/components/ui/GradientButton';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 
@@ -53,6 +54,16 @@ export default function ForgotPasswordPage() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        {/* Language Switcher */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="absolute top-6 right-6 z-10"
+        >
+          <LanguageSwitcher />
+        </motion.div>
+        
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -69,9 +80,9 @@ export default function ForgotPasswordPage() {
               >
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </motion.div>
-              <CardTitle className="text-2xl text-green-600">Email Sent!</CardTitle>
+              <CardTitle className="text-2xl text-green-600">{t('auth.emailSent')}</CardTitle>
               <CardDescription>
-                We've sent a password reset link to your email address. Please check your inbox and follow the instructions to reset your password.
+                {t('auth.emailSentDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -79,14 +90,14 @@ export default function ForgotPasswordPage() {
                 onClick={() => router.push('/login')}
                 className="w-full cursor-pointer"
               >
-                Back to Sign In
+                {t('auth.backToSignIn')}
               </GradientButton>
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
                 className="w-full cursor-pointer"
               >
-                Go to Homepage
+                {t('auth.goToHomepage')}
               </Button>
             </CardContent>
           </Card>
@@ -97,6 +108,16 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      {/* Language Switcher */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="absolute top-6 right-6 z-10"
+      >
+        <LanguageSwitcher />
+      </motion.div>
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -136,10 +157,10 @@ export default function ForgotPasswordPage() {
             <Mail className="w-8 h-8 text-blue-600" />
           </motion.div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Forgot Password?
+            {t('auth.forgotPasswordTitle')}
           </h1>
           <p className="mt-2 text-gray-600">
-            No worries! Enter your email address and we'll send you a reset link.
+            {t('auth.forgotPasswordSubtitle')}
           </p>
         </motion.div>
 
@@ -151,9 +172,9 @@ export default function ForgotPasswordPage() {
         >
           <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
+              <CardTitle className="text-2xl text-center">{t('auth.resetPassword')}</CardTitle>
               <CardDescription className="text-center">
-                Enter your email to receive reset instructions
+                {t('auth.resetPasswordSubtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -176,14 +197,14 @@ export default function ForgotPasswordPage() {
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                    {t('auth.emailAddress')}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
                     <input
                       {...register('email')}
                       type="email"
-                      placeholder="Enter your email address"
+                      placeholder={t('auth.enterEmailAddress')}
                       className="w-full pl-10 pr-4 py-3 h-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                     />
                   </div>
@@ -201,17 +222,17 @@ export default function ForgotPasswordPage() {
                   <GradientButton
                     type="submit"
                     disabled={isLoading}
-                    className="w-full cursor-pointer"
+                    className="w-full h-12 cursor-pointer flex items-center justify-center"
                   >
                     {isLoading ? (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Sending Reset Link...</span>
+                        <span>{t('auth.sendingResetLink')}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <Mail className="w-4 h-4" />
-                        <span>Send Reset Link</span>
+                        <span>{t('auth.sendResetLink')}</span>
                       </div>
                     )}
                   </GradientButton>
@@ -222,7 +243,7 @@ export default function ForgotPasswordPage() {
                     onClick={() => router.push('/login')}
                     className="w-full cursor-pointer"
                   >
-                    Back to Sign In
+                    {t('auth.backToSignIn')}
                   </Button>
                 </motion.div>
               </form>
@@ -238,12 +259,12 @@ export default function ForgotPasswordPage() {
           className="text-center mt-6"
         >
           <p className="text-sm text-gray-600">
-            Remember your password?{' '}
+            {t('auth.rememberPassword')}{' '}
             <button
               onClick={() => router.push('/login')}
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors cursor-pointer"
             >
-              Sign in here
+              {t('auth.signInHere')}
             </button>
           </p>
         </motion.div>
