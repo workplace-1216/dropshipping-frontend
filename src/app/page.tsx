@@ -76,10 +76,10 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <LanguageSwitcher />
-              <Button variant="outline" onClick={() => router.push('/login')}>
+              <Button variant="outline" onClick={() => router.push('/login')} className="cursor-pointer">
                 {t('auth.login') || 'Sign In'}
               </Button>
-              <GradientButton onClick={() => router.push('/register')}>
+              <GradientButton onClick={() => router.push('/register')} className="cursor-pointer">
                 {t('auth.register') || 'Sign Up'}
               </GradientButton>
             </motion.div>
@@ -120,7 +120,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            <GradientButton size="lg" onClick={() => router.push('/register')}>
+            <GradientButton size="lg" onClick={() => router.push('/register')} className="cursor-pointer">
               <span className="flex items-center">
                 Get Started <ArrowRight className="w-4 h-4 ml-2" />
               </span>

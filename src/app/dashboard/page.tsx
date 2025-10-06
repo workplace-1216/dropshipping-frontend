@@ -192,7 +192,7 @@ export default function Dashboard() {
                 <h3 className="text-lg font-semibold text-gray-900">
                   {t('dashboard.recentOrders')}
                 </h3>
-                <GradientButton size="sm" variant="secondary">
+                <GradientButton size="sm" variant="secondary" className="cursor-pointer">
                   View All
                 </GradientButton>
               </div>

@@ -77,14 +77,14 @@ export default function ForgotPasswordPage() {
             <CardContent className="space-y-4">
               <GradientButton
                 onClick={() => router.push('/login')}
-                className="w-full"
+                className="w-full cursor-pointer"
               >
                 Back to Sign In
               </GradientButton>
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
-                className="w-full"
+                className="w-full cursor-pointer"
               >
                 Go to Homepage
               </Button>
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -201,7 +201,7 @@ export default function ForgotPasswordPage() {
                   <GradientButton
                     type="submit"
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full cursor-pointer"
                   >
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
@@ -220,7 +220,7 @@ export default function ForgotPasswordPage() {
                     type="button"
                     variant="outline"
                     onClick={() => router.push('/login')}
-                    className="w-full"
+                    className="w-full cursor-pointer"
                   >
                     Back to Sign In
                   </Button>
@@ -241,7 +241,7 @@ export default function ForgotPasswordPage() {
             Remember your password?{' '}
             <button
               onClick={() => router.push('/login')}
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              className="font-medium text-blue-600 hover:text-blue-500 transition-colors cursor-pointer"
             >
               Sign in here
             </button>

@@ -62,7 +62,8 @@ export default function LoginPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 cursor-pointer hover:scale-105 transition-transform duration-200"
+            onClick={() => router.push('/')}
           >
             <span className="text-white font-bold text-2xl">W</span>
           </motion.div>
@@ -152,7 +153,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10 cursor-pointer"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -191,7 +192,7 @@ export default function LoginPage() {
                 >
                   <GradientButton
                     type="submit"
-                    className="w-full h-12 text-lg flex items-center justify-center"
+                    className="w-full h-12 text-lg flex items-center justify-center cursor-pointer"
                     disabled={isLoading}
                   >
                     {isLoading ? (
