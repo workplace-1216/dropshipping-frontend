@@ -353,16 +353,16 @@ export default function RegisterPage() {
                 >
                   <GradientButton
                     type="submit"
-                    className="w-full h-12 text-lg"
+                    className="w-full h-12 text-lg flex items-center justify-center"
                     disabled={isLoading}
                   >
                     {isLoading ? (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Creating Account...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <span>{t('auth.createAccount')}</span>
                         <ArrowRight className="w-4 h-4" />
                       </div>

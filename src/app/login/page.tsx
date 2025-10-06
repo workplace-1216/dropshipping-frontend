@@ -191,16 +191,16 @@ export default function LoginPage() {
                 >
                   <GradientButton
                     type="submit"
-                    className="w-full h-12 text-lg"
+                    className="w-full h-12 text-lg flex items-center justify-center"
                     disabled={isLoading}
                   >
                     {isLoading ? (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Signing in...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         <span>{t('auth.login')}</span>
                         <ArrowRight className="w-4 h-4" />
                       </div>
