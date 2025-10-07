@@ -9,13 +9,7 @@ export interface ApiResponse<T = any> {
 
 export interface AuthResponse {
   access_token: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: 'ADMIN' | 'SELLER' | 'BUYER';
-  };
+  user: User;
 }
 
 export interface User {
@@ -23,7 +17,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'ADMIN' | 'SELLER' | 'BUYER';
+  role: 'ADMIN' | 'OPERATOR' | 'SUPPLIER' | 'SELLER';
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -39,7 +33,7 @@ export interface RegisterData {
   password: string;
   firstName: string;
   lastName: string;
-  role?: 'ADMIN' | 'SELLER' | 'BUYER';
+  role?: 'ADMIN' | 'OPERATOR' | 'SUPPLIER' | 'SELLER';
 }
 
 class ApiClient {
@@ -47,7 +41,7 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
     
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -78,9 +72,15 @@ class ApiClient {
       (error) => {
         if (error.response?.status === 401) {
           this.removeToken();
-          // Redirect to login page if we're in browser
+          // Only redirect to login if NOT already on auth pages
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const currentPath = window.location.pathname;
+            const authPaths = ['/login', '/register', '/forgot-password'];
+            const isOnAuthPage = authPaths.some(path => currentPath.startsWith(path));
+            
+            if (!isOnAuthPage) {
+              window.location.href = '/login';
+            }
           }
         }
         return Promise.reject(error);
@@ -113,8 +113,13 @@ class ApiClient {
     return response.data;
   }
 
-  async register(data: RegisterData): Promise<User> {
-    const response = await this.client.post<User>('/auth/register', data);
+  async register(data: RegisterData): Promise<AuthResponse> {
+    console.log('API Client: Sending registration request to:', `${this.baseURL}/auth/register`);
+    console.log('API Client: Registration data:', { ...data, password: '***' });
+    const response = await this.client.post<AuthResponse>('/auth/register', data);
+    console.log('API Client: Registration response received:', response.data);
+    this.setToken(response.data.access_token);
+    console.log('API Client: Token stored successfully');
     return response.data;
   }
 
@@ -152,3 +157,5 @@ class ApiClient {
 // Export singleton instance
 export const apiClient = new ApiClient();
 export default apiClient;
+
+

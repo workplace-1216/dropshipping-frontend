@@ -61,14 +61,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const register = async (data: RegisterData) => {
     try {
       setIsLoading(true);
-      await apiClient.register(data);
-      // After successful registration, automatically log in
-      await login({ email: data.email, password: data.password });
+      console.log('AuthContext: Starting registration API call...');
+      const response = await apiClient.register(data);
+      console.log('AuthContext: Registration response:', response);
+      // Backend auto-logs in after registration, so set the user
+      setUser(response.user);
+      console.log('AuthContext: User set successfully:', response.user);
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('AuthContext: Registration failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
+      console.log('AuthContext: Loading state set to false');
     }
   };
 
@@ -111,3 +115,5 @@ export function useAuth() {
   }
   return context;
 }
+
+

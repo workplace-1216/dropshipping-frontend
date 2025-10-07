@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToastHelpers } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -24,7 +25,8 @@ import {
   AlertCircle,
   CheckCircle,
   Store,
-  ShoppingBag
+  Package,
+  Warehouse
 } from 'lucide-react';
 
 const registerSchema = z.object({
@@ -33,7 +35,7 @@ const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
-  role: z.enum(['SELLER', 'BUYER']),
+  role: z.enum(['SUPPLIER', 'SELLER']),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -45,6 +47,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser, isLoading } = useAuth();
   const { t } = useLanguage();
+  const toast = useToastHelpers();
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,7 +60,7 @@ export default function RegisterPage() {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: 'SELLER',
+      role: 'SUPPLIER',
     },
   });
 
@@ -66,11 +69,44 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
+      console.log('Starting registration with data:', { ...data, password: '***', confirmPassword: '***' });
+      
       const { confirmPassword, ...registerData } = data;
+      
+      console.log('Calling registerUser...');
       await registerUser(registerData);
-      router.push('/dashboard');
+      
+      console.log('Registration successful!');
+      
+      // Show success toast
+      toast.success(
+        'Account Created Successfully!',
+        `Welcome ${data.firstName}! Your account has been created and you're now logged in.`
+      );
+      
+      // Small delay to show the toast before navigation
+      setTimeout(() => {
+        // Redirect based on role
+        if (data.role === 'SUPPLIER') {
+          router.push('/supplier');
+        } else if (data.role === 'SELLER') {
+          router.push('/seller');
+        } else {
+          router.push('/dashboard');
+        }
+      }, 1000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      console.error('Error response:', err.response?.data);
+      
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
+      
+      // Show error toast
+      toast.error(
+        'Registration Failed',
+        errorMessage
+      );
     }
   };
 
@@ -137,10 +173,10 @@ export default function RegisterPage() {
                   </motion.div>
                   
                   <h2 className="text-3xl font-bold mb-3 text-white text-center">
-                    {t('auth.register')}
+                    Join Our Platform
                   </h2>
                   <p className="text-lg text-white/90 leading-relaxed text-center">
-                    {t('auth.createAccountSubtitle')}
+                    Start managing your dropshipping business today
                   </p>
                 </motion.div>
 
@@ -159,10 +195,10 @@ export default function RegisterPage() {
                  {/* Features */}
                  <div className="space-y-4 mt-0 pl-[20%] sm:pl-[30%] md:pl-[36%] lg:px-20 xl:px-24 2xl:px-24">
                    {[
-                     t('auth.feature1'),
-                     t('auth.feature2'),
-                     t('auth.feature3'),
-                     t('auth.feature4')
+                     'Multi-tenant inventory management',
+                     'Real-time order tracking',
+                     'Automated alerts & reporting',
+                     'Secure payment processing'
                    ].map((feature, index) => (
                     <motion.div
                       key={feature}
@@ -174,7 +210,7 @@ export default function RegisterPage() {
                       <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-white/90">{feature}</span>
+                      <span className="text-white/90 text-sm">{feature}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -182,7 +218,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Right Side - Form */}
-            <div className="p-8 lg:p-12 flex flex-col justify-center">
+            <div className="p-8 lg:p-12 lg:py-10 flex flex-col justify-center">
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -190,28 +226,17 @@ export default function RegisterPage() {
                 className="max-w-md mx-auto w-full"
               >
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-4">
                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                     {t('auth.register')}
+                     Create Account
                    </h2>
                    <p className="text-gray-600">
-                     {t('auth.createAccountSubtitle')}
+                     Choose your role and start managing inventory
           </p>
         </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg"
-                    >
-                      <AlertCircle className="w-5 h-5 text-red-500" />
-                      <span className="text-red-700 text-sm">{error}</span>
-                    </motion.div>
-                  )}
 
                   {/* Role Selection */}
                   <motion.div
@@ -221,67 +246,67 @@ export default function RegisterPage() {
                     className="space-y-3"
                   >
                     <label className="block text-sm font-semibold text-gray-700">
-                      {t('auth.accountType')}
+                      I want to join as a...
                     </label>
                     <div className="grid grid-cols-2 gap-3">
+                      {/* Supplier Role */}
                       <motion.label
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'SELLER'
+                        className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'SUPPLIER'
                           ? 'border-blue-500 bg-blue-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                           }`}
                       >
-                    <input
-                      {...register('role')}
-                      type="radio"
-                      value="SELLER"
+                        <input
+                          {...register('role')}
+                          type="radio"
+                          value="SUPPLIER"
                           className="sr-only"
                         />
-                        <Store className={`w-5 h-5 mr-3 ${selectedRole === 'SELLER' ? 'text-blue-600' : 'text-gray-400'
-                          }`} />
-                        <div>
-                           <div className={`font-semibold text-sm ${selectedRole === 'SELLER' ? 'text-blue-900' : 'text-gray-900'
-                             }`}>
-                             {t('auth.seller')}
-                           </div>
-                           <div className={`text-xs ${selectedRole === 'SELLER' ? 'text-blue-600' : 'text-gray-500'
-                             }`}>
-                             {t('auth.sellProducts')}
-                           </div>
+                        <div className="flex items-start">
+                          <Warehouse className={`w-6 h-6 mr-3 flex-shrink-0 ${selectedRole === 'SUPPLIER' ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <div className="flex-1">
+                            <div className={`font-semibold text-sm mb-1 ${selectedRole === 'SUPPLIER' ? 'text-blue-900' : 'text-gray-900'}`}>
+                              Supplier
+                            </div>
+                            <div className={`text-xs leading-relaxed ${selectedRole === 'SUPPLIER' ? 'text-blue-600' : 'text-gray-500'}`}>
+                              Manage inventory, fulfill orders, and supply products
+                            </div>
+                          </div>
                         </div>
-                        {selectedRole === 'SELLER' && (
+                        {selectedRole === 'SUPPLIER' && (
                           <CheckCircle className="absolute top-2 right-2 w-5 h-5 text-blue-600" />
                         )}
                       </motion.label>
 
+                      {/* Seller Role */}
                       <motion.label
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'BUYER'
+                        className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'SELLER'
                           ? 'border-purple-500 bg-purple-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                           }`}
                       >
-                    <input
-                      {...register('role')}
-                      type="radio"
-                      value="BUYER"
+                        <input
+                          {...register('role')}
+                          type="radio"
+                          value="SELLER"
                           className="sr-only"
                         />
-                        <ShoppingBag className={`w-5 h-5 mr-3 ${selectedRole === 'BUYER' ? 'text-purple-600' : 'text-gray-400'
-                          }`} />
-                        <div>
-                           <div className={`font-semibold text-sm ${selectedRole === 'BUYER' ? 'text-purple-900' : 'text-gray-900'
-                             }`}>
-                             {t('auth.buyer')}
-                           </div>
-                           <div className={`text-xs ${selectedRole === 'BUYER' ? 'text-purple-600' : 'text-gray-500'
-                             }`}>
-                             {t('auth.buyProducts')}
-                </div>
-              </div>
-                        {selectedRole === 'BUYER' && (
+                        <div className="flex items-start">
+                          <Store className={`w-6 h-6 mr-3 flex-shrink-0 ${selectedRole === 'SELLER' ? 'text-purple-600' : 'text-gray-400'}`} />
+                          <div className="flex-1">
+                            <div className={`font-semibold text-sm mb-1 ${selectedRole === 'SELLER' ? 'text-purple-900' : 'text-gray-900'}`}>
+                              Seller
+                            </div>
+                            <div className={`text-xs leading-relaxed ${selectedRole === 'SELLER' ? 'text-purple-600' : 'text-gray-500'}`}>
+                              List products, manage sales, and track performance
+                            </div>
+                          </div>
+                        </div>
+                        {selectedRole === 'SELLER' && (
                           <CheckCircle className="absolute top-2 right-2 w-5 h-5 text-purple-600" />
                         )}
                       </motion.label>
@@ -444,10 +469,10 @@ export default function RegisterPage() {
                     transition={{ duration: 0.5, delay: 1.0 }}
                   >
                     <GradientButton
-                type="submit"
+                      type="submit"
                       className="w-full h-12 text-lg font-semibold cursor-pointer"
-                disabled={isLoading}
-              >
+                      disabled={isLoading}
+                    >
                       {isLoading ? (
                         <div className="flex items-center justify-center space-x-2">
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -536,4 +561,6 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+
 

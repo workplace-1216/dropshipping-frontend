@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToastHelpers } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -25,8 +26,9 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, user } = useAuth();
   const { t, currentLanguage } = useLanguage();
+  const toast = useToastHelpers();
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -43,15 +45,35 @@ export default function LoginPage() {
     try {
       setError('');
       await login(data);
-      router.push('/dashboard');
+      
+      // Show success toast
+      toast.success(
+        'Welcome Back!',
+        `Successfully logged in. Redirecting to your dashboard...`
+      );
+      
+      // Small delay to show the toast before navigation
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
     } catch (err: any) {
       // Translate common error messages
       const errorMessage = err.response?.data?.message;
+      let displayError = '';
+      
       if (errorMessage === 'Invalid email or password') {
-        setError(t('auth.invalidCredentials'));
+        displayError = t('auth.invalidCredentials');
       } else {
-        setError(t('auth.loginFailed'));
+        displayError = t('auth.loginFailed');
       }
+      
+      setError(displayError);
+      
+      // Show error toast
+      toast.error(
+        'Login Failed',
+        displayError
+      );
     }
   };
 
@@ -389,3 +411,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
