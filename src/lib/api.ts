@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { getLogoutRedirectUrl } from './redirect';
 
 // API Response types
 export interface ApiResponse<T = any> {
@@ -108,8 +109,15 @@ class ApiClient {
 
   // Auth methods
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    console.log('API Client: Sending login request to:', `${this.baseURL}/auth/login`);
+    console.log('API Client: Login credentials:', { email: credentials.email, password: '***' });
+    
     const response = await this.client.post<AuthResponse>('/auth/login', credentials);
+    console.log('API Client: Login response received:', response.data);
+    
     this.setToken(response.data.access_token);
+    console.log('API Client: Token stored successfully');
+    
     return response.data;
   }
 

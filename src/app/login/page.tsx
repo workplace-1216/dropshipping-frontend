@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
+import { getAuthRedirectUrl } from '@/lib/redirect';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -44,7 +45,10 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError('');
-      await login(data);
+      console.log('Login attempt with data:', { email: data.email, password: '***' });
+      
+      const loggedInUser = await login(data);
+      console.log('Login successful, user:', loggedInUser);
       
       // Show success toast
       toast.success(
@@ -54,7 +58,9 @@ export default function LoginPage() {
       
       // Small delay to show the toast before navigation
       setTimeout(() => {
-        router.push('/dashboard');
+        const redirectUrl = getAuthRedirectUrl(loggedInUser);
+        console.log('Redirecting to:', redirectUrl);
+        router.push(redirectUrl);
       }, 1000);
     } catch (err: any) {
       // Translate common error messages

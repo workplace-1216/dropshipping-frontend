@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { apiClient, User, LoginCredentials, RegisterData } from '@/lib/api';
+import { getLogoutRedirectUrl } from '@/lib/redirect';
 
 interface AuthContextType {
   user: User | null;
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(true);
       const response = await apiClient.login(credentials);
       setUser(response.user);
+      return response.user; // Return user data for immediate use
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -79,6 +81,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     apiClient.logout();
     setUser(null);
+    
+    // Redirect to home page after logout
+    if (typeof window !== 'undefined') {
+      window.location.href = getLogoutRedirectUrl();
+    }
   };
 
   const refreshUser = async () => {
