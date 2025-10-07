@@ -53,6 +53,7 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
         'hover:shadow-lg hover:shadow-blue-500/25',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+        'flex items-center justify-center gap-2',
         variants[variant],
         sizes[size],
         className

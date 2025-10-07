@@ -79,8 +79,7 @@ export default function SupplierDashboard() {
               onClick={() => router.push('/supplier/products/new')}
               className="cursor-pointer"
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Product
+              <Plus className="w-4 h-4" /> Add Product
             </GradientButton>
           </div>
         </div>
@@ -212,11 +211,10 @@ export default function SupplierDashboard() {
                   <div className="text-right">
                     <p className="font-bold text-gray-900">${order.total}</p>
                     <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        order.status === 'Pending'
+                      className={`text-xs px-2 py-1 rounded-full ${order.status === 'Pending'
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-blue-100 text-blue-800'
-                      }`}
+                        }`}
                     >
                       {order.status}
                     </span>
@@ -305,11 +303,10 @@ export default function SupplierDashboard() {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          product.status === 'Active'
+                        className={`px-2 py-1 text-xs font-medium rounded-full ${product.status === 'Active'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-orange-100 text-orange-800'
-                        }`}
+                          }`}
                       >
                         {product.status}
                       </span>
