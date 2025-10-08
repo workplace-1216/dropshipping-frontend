@@ -6,9 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { AnimatedCard } from '@/components/ui/AnimatedCard';
-import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { 
   TrendingUp, 
