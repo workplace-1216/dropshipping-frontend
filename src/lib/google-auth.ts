@@ -84,7 +84,7 @@ class GoogleAuthService {
   /**
    * Handle Google OAuth credential response
    */
-  private handleCredentialResponse(response: any): void {
+  private handleCredentialResponse(response: unknown): void {
     // This will be handled by the component that calls signIn
     console.log('Google credential response received:', response);
   }
@@ -99,18 +99,18 @@ class GoogleAuthService {
       // Set up global callback
       window.google.accounts.id.initialize({
         client_id: this.clientId,
-        callback: (response: any) => {
+        callback: (response: { credential?: string }) => {
           if (response.credential) {
             // Decode the JWT token to get user info
             const payload = this.decodeJWT(response.credential);
             
             const googleUser: GoogleUser = {
-              id: payload.sub,
-              email: payload.email,
-              name: payload.name,
-              picture: payload.picture,
-              given_name: payload.given_name,
-              family_name: payload.family_name,
+              id: payload.sub as string,
+              email: payload.email as string,
+              name: payload.name as string,
+              picture: payload.picture as string,
+              given_name: payload.given_name as string,
+              family_name: payload.family_name as string,
             };
 
             const authResponse: GoogleAuthResponse = {
@@ -183,7 +183,7 @@ class GoogleAuthService {
   /**
    * Decode JWT token (client-side only, for basic user info)
    */
-  private decodeJWT(token: string): any {
+  private decodeJWT(token: string): Record<string, unknown> {
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -220,6 +220,26 @@ export const googleAuth = new GoogleAuthService();
 // Add Google types to window
 declare global {
   interface Window {
-    google: any;
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: { 
+            client_id: string; 
+            callback: (response: { credential?: string }) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+          }) => void;
+          prompt: () => void;
+          renderButton: (element: HTMLElement, options: {
+            theme?: string;
+            size?: string;
+            type?: string;
+            width?: string;
+            text?: string;
+          }) => void;
+          disableAutoSelect: () => void;
+        };
+      };
+    };
   }
 }

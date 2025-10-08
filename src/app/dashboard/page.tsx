@@ -7,8 +7,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { GradientButton } from '@/components/ui/GradientButton';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { AnimatedCard } from '@/components/ui/AnimatedCard';
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { 
-  TrendingUp, 
   ShoppingCart, 
   Package, 
   Users, 
@@ -64,7 +66,8 @@ export default function Dashboard() {
       change: 12.5,
       trend: 'up',
       icon: ShoppingCart,
-      color: 'blue'
+      color: 'blue',
+      suffix: ''
     },
     {
       title: t('dashboard.totalRevenue'),
@@ -74,7 +77,8 @@ export default function Dashboard() {
       icon: DollarSign,
       color: 'green',
       prefix: '$',
-      decimals: 0
+      decimals: 0,
+      suffix: ''
     },
     {
       title: t('dashboard.totalProducts'),
@@ -82,7 +86,8 @@ export default function Dashboard() {
       change: -2.1,
       trend: 'down',
       icon: Package,
-      color: 'purple'
+      color: 'purple',
+      suffix: ''
     },
     {
       title: t('dashboard.activeUsers'),
@@ -90,7 +95,8 @@ export default function Dashboard() {
       change: 15.3,
       trend: 'up',
       icon: Users,
-      color: 'orange'
+      color: 'orange',
+      suffix: ''
     }
   ];
 
@@ -120,7 +126,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">
-                {t('dashboard.welcome')}, {user?.name || 'User'}! 👋
+                {t('dashboard.welcome')}, {user?.firstName || 'User'}! 👋
               </h1>
               <p className="mt-2 text-blue-100">
                 {t('dashboard.welcomeSubtitle')} {user?.role || t('common.account')} {t('common.today')}.

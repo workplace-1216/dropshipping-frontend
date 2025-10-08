@@ -83,11 +83,13 @@ export default function RegisterPage() {
         console.log('Redirecting to:', redirectUrl);
         router.push(redirectUrl);
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
-      console.error('Error response:', err.response?.data);
+      const errorResponse = (err as { response?: { data?: unknown } })?.response?.data;
+      console.error('Error response:', errorResponse);
       
-      const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      const errorMessage = (err as { response?: { data?: { message?: string } }, message?: string })?.response?.data?.message || 
+                          (err as { message?: string })?.message || 'Registration failed. Please try again.';
       setError(errorMessage);
       
       // Show error toast
@@ -141,9 +143,9 @@ export default function RegisterPage() {
         router.push(redirectUrl);
       }, 1000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Google Sign-Up error:', err);
-      const errorMessage = err.message || 'Google authentication failed';
+      const errorMessage = (err as { message?: string })?.message || 'Google authentication failed';
       setError(errorMessage);
       
       toast.error(

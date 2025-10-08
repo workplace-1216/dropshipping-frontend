@@ -109,10 +109,9 @@ export const LanguageSwitcher: React.FC = () => {
                     x: 4,
                     backgroundColor: 'rgba(75, 85, 99, 0.5)'
                   }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2, delay: index * 0.1 }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gray-600 to-gray-500 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">

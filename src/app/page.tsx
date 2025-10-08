@@ -995,7 +995,7 @@ export default function Home() {
 
                 {/* Feature Checklist */}
                 <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-4">What's Included</h4>
+                  <h4 className="text-sm font-semibold text-gray-400 mb-4">What&apos;s Included</h4>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -1369,7 +1369,7 @@ export default function Home() {
                 >
                   <div className='flex items-center'>
                     <Rocket className="w-6 h-6 mr-2 text-blue-200" />
-                    <span className="text-white font-semibold">Sign Up Now - It's Free!</span>
+                    <span className="text-white font-semibold">Sign Up Now - It&apos;s Free!</span>
                   </div>
                 </GradientButton>
                 <Button

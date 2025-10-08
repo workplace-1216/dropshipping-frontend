@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
 import { getAuthRedirectUrl } from '@/lib/redirect';
+import { User } from '@/lib/api';
 import { googleAuth } from '@/lib/google-auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -63,9 +64,9 @@ export default function LoginPage() {
         console.log('Redirecting to:', redirectUrl);
         router.push(redirectUrl);
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Translate common error messages
-      const errorMessage = err.response?.data?.message;
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       let displayError = '';
       
       if (errorMessage === 'Invalid email or password') {
@@ -127,9 +128,9 @@ export default function LoginPage() {
         router.push(redirectUrl);
       }, 1000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Google Sign-In error:', err);
-      const errorMessage = err.message || 'Google authentication failed';
+      const errorMessage = (err as { message?: string })?.message || 'Google authentication failed';
       setError(errorMessage);
       
       toast.error(
