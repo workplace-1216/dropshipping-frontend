@@ -14,14 +14,12 @@ export function getDashboardUrl(user: User | null): string {
   }
 
   switch (user.role) {
-    case 'SUPPLIER':
-      return '/supplier';
-    case 'SELLER':
-      return '/seller';
     case 'ADMIN':
       return '/admin';
     case 'OPERATOR':
       return '/dashboard';
+    case 'SUPPLIER':
+    case 'SELLER':
     default:
       return '/dashboard';
   }

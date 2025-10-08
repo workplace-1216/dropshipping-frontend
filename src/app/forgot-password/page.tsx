@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
         {/* Language Switcher */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -64,24 +64,29 @@ export default function ForgotPasswordPage() {
           <LanguageSwitcher />
         </motion.div>
         
+        {/* Background Pattern */}
+        <div className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-20 sm:-bottom-40 sm:-left-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md relative z-10"
         >
-          <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-xl bg-gray-800/90 backdrop-blur-xl border-gray-700/50 rounded-2xl sm:rounded-3xl">
             <CardHeader className="text-center space-y-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center"
+                className="mx-auto w-16 h-16 bg-green-900/20 rounded-full flex items-center justify-center"
               >
-                <CheckCircle className="w-8 h-8 text-green-600" />
+                <CheckCircle className="w-8 h-8 text-green-400" />
               </motion.div>
-              <CardTitle className="text-2xl text-green-600">{t('auth.emailSent')}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl text-green-400">{t('auth.emailSent')}</CardTitle>
+              <CardDescription className="text-gray-300">
                 {t('auth.emailSentDescription')}
               </CardDescription>
             </CardHeader>
@@ -95,7 +100,7 @@ export default function ForgotPasswordPage() {
               <Button
                 variant="outline"
                 onClick={() => router.push('/')}
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-all duration-200"
               >
                 {t('auth.goToHomepage')}
               </Button>
@@ -107,7 +112,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-hidden">
       {/* Language Switcher */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -118,11 +123,16 @@ export default function ForgotPasswordPage() {
         <LanguageSwitcher />
       </motion.div>
       
+      {/* Background Pattern */}
+      <div className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-20 -left-20 sm:-bottom-40 sm:-left-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl"></div>
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Back Button */}
         <motion.div
@@ -134,7 +144,7 @@ export default function ForgotPasswordPage() {
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 cursor-pointer"
+            className="flex items-center space-x-2 text-blue-300 hover:text-blue-200 hover:bg-gray-700/50 rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
@@ -152,14 +162,14 @@ export default function ForgotPasswordPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-            className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4"
+            className="mx-auto w-16 h-16 bg-blue-900/20 rounded-full flex items-center justify-center mb-4"
           >
-            <Mail className="w-8 h-8 text-blue-600" />
+            <Mail className="w-8 h-8 text-blue-300" />
           </motion.div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             {t('auth.forgotPasswordTitle')}
           </h1>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-gray-300">
             {t('auth.forgotPasswordSubtitle')}
           </p>
         </motion.div>
@@ -170,10 +180,10 @@ export default function ForgotPasswordPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-xl bg-gray-700/90 backdrop-blur-xl border-gray-700/50 rounded-2xl sm:rounded-3xl">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">{t('auth.resetPassword')}</CardTitle>
-              <CardDescription className="text-center">
+              <CardTitle className="text-2xl text-center text-white">{t('auth.resetPassword')}</CardTitle>
+              <CardDescription className="text-center text-gray-300">
                 {t('auth.resetPasswordSubtitle')}
               </CardDescription>
             </CardHeader>
@@ -184,10 +194,10 @@ export default function ForgotPasswordPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3 }}
-                    className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+                    className="flex items-center space-x-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg"
                   >
                     <AlertCircle className="w-5 h-5 text-red-500" />
-                    <span className="text-red-700 text-sm">{error}</span>
+                    <span className="text-red-300 text-sm">{error}</span>
                   </motion.div>
                 )}
 
@@ -196,20 +206,20 @@ export default function ForgotPasswordPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
                 >
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                     {t('auth.emailAddress')}
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-300 w-5 h-5 z-10" />
                     <input
                       {...register('email')}
                       type="email"
                       placeholder={t('auth.enterEmailAddress')}
-                      className="w-full pl-10 pr-4 py-3 h-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      className="w-full pl-10 pr-4 py-3 h-12 border border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-700/50 text-white placeholder-gray-400 transition-all duration-200"
                     />
                   </div>
                   {errors.email?.message && (
-                    <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                    <p className="text-sm text-red-400 mt-1">{errors.email.message}</p>
                   )}
                 </motion.div>
 
@@ -241,7 +251,7 @@ export default function ForgotPasswordPage() {
                     type="button"
                     variant="outline"
                     onClick={() => router.push('/login')}
-                    className="w-full cursor-pointer"
+                    className="w-full cursor-pointer border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-gray-500 transition-all duration-200"
                   >
                     {t('auth.backToSignIn')}
                   </Button>
@@ -258,11 +268,11 @@ export default function ForgotPasswordPage() {
           transition={{ duration: 0.5, delay: 0.7 }}
           className="text-center mt-6"
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-300">
             {t('auth.rememberPassword')}{' '}
             <button
               onClick={() => router.push('/login')}
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors cursor-pointer"
+              className="font-medium text-blue-300 hover:text-blue-200 transition-colors cursor-pointer"
             >
               {t('auth.signInHere')}
             </button>

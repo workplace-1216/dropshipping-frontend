@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Globe, Check, ChevronDown } from 'lucide-react';
@@ -19,36 +19,54 @@ const languages = [
 export const LanguageSwitcher: React.FC = () => {
   const { currentLanguage, changeLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const currentLang = languages.find(lang => lang.code === currentLanguage) || languages[0];
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       {/* Main Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="group relative flex items-center space-x-3 px-4 py-3 rounded-xl border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-150 cursor-pointer hover:bg-gradient-to-r hover:from-blue-500/30 hover:to-purple-500/30 z-50"
+        className="group relative flex items-center space-x-2 px-3 py-2 rounded-lg border border-blue-400/50 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer hover:bg-blue-500/20 z-50"
         whileHover={{ 
           scale: 1.02,
           y: -1
         }}
         whileTap={{ scale: 0.98 }}
         style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)',
+          background: 'rgba(59, 130, 246, 0.1)',
           backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(148, 163, 184, 0.2)'
+          border: '1px solid rgba(96, 165, 250, 0.3)'
         }}
       >
         
         {/* Content */}
-        <div className="relative flex items-center space-x-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-md">
-            <Globe className="w-4 h-4 text-white" />
+        <div className="relative flex items-center space-x-2">
+          <div className="flex items-center justify-center w-6 h-6 rounded-md bg-gradient-to-br from-blue-400 to-purple-500 shadow-sm">
+            <Globe className="w-3 h-3 text-white" />
           </div>
           
-          <div className="flex items-center space-x-2">
-            <span className="text-lg">{currentLang.flag}</span>
-            <span className="text-sm font-semibold text-slate-700">{currentLang.short}</span>
+          <div className="flex items-center space-x-1">
+            <span className="text-sm text-gray-300">{currentLang.flag}</span>
+            <span className="text-xs font-semibold text-blue-300">{currentLang.short}</span>
           </div>
           
           <motion.div
@@ -56,7 +74,7 @@ export const LanguageSwitcher: React.FC = () => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="flex items-center justify-center"
           >
-            <ChevronDown className="w-4 h-4 text-slate-500" />
+            <ChevronDown className="w-3 h-3 text-blue-400" />
           </motion.div>
         </div>
       </motion.button>
@@ -64,18 +82,6 @@ export const LanguageSwitcher: React.FC = () => {
       {/* Dropdown Menu */}
           <AnimatePresence>
             {isOpen && (
-              <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-[90]"
-              onClick={() => setIsOpen(false)}
-            />
-            
-            {/* Menu */}
             <motion.div
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -84,11 +90,11 @@ export const LanguageSwitcher: React.FC = () => {
                 duration: 0.3,
                 ease: [0.4, 0, 0.2, 1]
               }}
-              className="absolute top-full mt-3 right-0 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200/50 py-2 min-w-[200px] z-[100]"
+              className="absolute top-full mt-2 right-0 backdrop-blur-xl rounded-xl shadow-xl border border-gray-500/50 py-1 min-w-[160px] z-[10000]"
               style={{
-                background: 'rgba(255, 255, 255, 0.95)',
+                background: 'rgba(55, 65, 81, 0.95)',
                 backdropFilter: 'blur(20px)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(148, 163, 184, 0.1)'
+                boxShadow: '0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(107, 114, 128, 0.3)'
               }}
             >
               {languages.map((language, index) => (
@@ -101,7 +107,7 @@ export const LanguageSwitcher: React.FC = () => {
                   className="w-full flex items-center justify-between px-4 py-3 text-sm transition-all duration-200 group"
                   whileHover={{ 
                     x: 4,
-                    backgroundColor: 'rgba(59, 130, 246, 0.05)'
+                    backgroundColor: 'rgba(75, 85, 99, 0.5)'
                   }}
                   transition={{ duration: 0.2 }}
                   initial={{ opacity: 0, x: -20 }}
@@ -109,14 +115,14 @@ export const LanguageSwitcher: React.FC = () => {
                   transition={{ delay: index * 0.1 }}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-blue-100 group-hover:to-purple-100 transition-all duration-200">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gray-600 to-gray-500 group-hover:from-blue-400 group-hover:to-purple-500 transition-all duration-200">
                       <span className="text-lg">{language.flag}</span>
                     </div>
                     <div className="text-left">
-                      <div className="font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">
+                      <div className="font-semibold text-white group-hover:text-blue-300 transition-colors">
                         {language.name}
                       </div>
-                      <div className="text-xs text-slate-500 group-hover:text-slate-600 transition-colors">
+                      <div className="text-xs text-gray-300 group-hover:text-blue-200 transition-colors">
                         {language.short}
                       </div>
                     </div>
@@ -139,9 +145,8 @@ export const LanguageSwitcher: React.FC = () => {
               ))}
               
               {/* Bottom Accent */}
-              <div className="mx-4 mt-2 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+              <div className="mx-4 mt-2 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent" />
             </motion.div>
-          </>
         )}
       </AnimatePresence>
     </div>

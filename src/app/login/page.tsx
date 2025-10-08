@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
 import { getAuthRedirectUrl } from '@/lib/redirect';
+import { googleAuth } from '@/lib/google-auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -83,6 +84,61 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      
+      // Show loading toast
+      toast.info('Signing in with Google...', 'Please complete the Google authentication');
+      
+      const googleResponse = await googleAuth.signIn();
+      
+      // Send Google credential to backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          credential: googleResponse.access_token,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Google authentication failed');
+      }
+
+      const authData = await response.json();
+      
+      // Store the auth data in context
+      localStorage.setItem('access_token', authData.access_token);
+      localStorage.setItem('user', JSON.stringify(authData.user));
+      
+      // Show success toast
+      toast.success(
+        'Welcome!',
+        `Successfully signed in with Google. Redirecting to your dashboard...`
+      );
+      
+      // Redirect to appropriate dashboard
+      setTimeout(() => {
+        const redirectUrl = getAuthRedirectUrl(authData.user);
+        console.log('Redirecting to:', redirectUrl);
+        router.push(redirectUrl);
+      }, 1000);
+      
+    } catch (err: any) {
+      console.error('Google Sign-In error:', err);
+      const errorMessage = err.message || 'Google authentication failed';
+      setError(errorMessage);
+      
+      toast.error(
+        'Google Sign-In Failed',
+        errorMessage
+      );
+    }
+  };
+
   // Handle hydration
   useEffect(() => {
     setIsHydrated(true);
@@ -108,14 +164,14 @@ export default function LoginPage() {
   // Show loading state until hydrated
   if (!isHydrated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-2 sm:p-4 lg:p-6 relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center p-2 sm:p-4 lg:p-6 relative">
       {/* Language Switcher */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -128,9 +184,9 @@ export default function LoginPage() {
       
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-20 -left-20 sm:-bottom-40 sm:-left-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-300/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-20 sm:-bottom-40 sm:-left-40 w-40 h-40 sm:w-80 sm:h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Main Container */}
@@ -139,11 +195,11 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+          className="bg-gray-800/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-700/50 overflow-hidden"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] sm:min-h-[600px]">
             {/* Left Side - Branding */}
-            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start pt-8 sm:pt-12 lg:pt-16 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-950 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-start pt-8 sm:pt-12 lg:pt-16 relative overflow-hidden">
               {/* Background Elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-0 right-0 w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -230,10 +286,10 @@ export default function LoginPage() {
               >
                 {/* Header */}
                 <div className="text-center mb-6 sm:mb-8">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
                     {t('auth.login')}
                   </h2>
-                  <p className="text-sm sm:text-base text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-300">
                     {t('auth.welcome')}
                   </p>
                 </div>
@@ -245,10 +301,10 @@ export default function LoginPage() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
-                      className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+                      className="flex items-center space-x-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg"
                     >
                       <AlertCircle className="w-5 h-5 text-red-500" />
-                      <span className="text-red-700 text-sm">{error}</span>
+                      <span className="text-red-300 text-sm">{error}</span>
                     </motion.div>
                   )}
 
@@ -258,7 +314,7 @@ export default function LoginPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                   >
-                    <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                    <label htmlFor="email" className="block text-xs sm:text-sm font-semibold text-gray-300 mb-2">
                       {t('auth.email')}
                     </label>
                     <div className="relative">
@@ -268,7 +324,7 @@ export default function LoginPage() {
                         id="email"
                         type="email"
                         placeholder={t('auth.email')}
-                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                        className={`pl-10 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 ${errors.email ? 'border-red-500' : ''}`}
                       />
                       {errors.email && (
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -277,7 +333,7 @@ export default function LoginPage() {
                       )}
                     </div>
                     {errors.email && (
-                      <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
                     )}
                   </motion.div>
 
@@ -287,7 +343,7 @@ export default function LoginPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.5 }}
                   >
-                    <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                    <label htmlFor="password" className="block text-xs sm:text-sm font-semibold text-gray-300 mb-2">
                       {t('auth.password')}
                     </label>
                     <div className="relative">
@@ -297,12 +353,12 @@ export default function LoginPage() {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder={t('auth.password')}
-                        className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                        className={`pl-10 pr-10 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 ${errors.password ? 'border-red-500' : ''}`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -313,7 +369,7 @@ export default function LoginPage() {
                       )}
                     </div>
                     {errors.password && (
-                      <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                      <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
                     )}
                   </motion.div>
 
@@ -329,11 +385,11 @@ export default function LoginPage() {
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-xs sm:text-sm text-gray-600">{t('auth.rememberMe')}</span>
+                      <span className="text-xs sm:text-sm text-gray-300">{t('auth.rememberMe')}</span>
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="text-xs sm:text-sm text-blue-600 hover:text-blue-500 font-medium"
+                      className="text-xs sm:text-sm text-blue-400 hover:text-blue-300 font-medium"
                     >
                       {t('auth.forgotPassword')}
                     </Link>
@@ -366,19 +422,20 @@ export default function LoginPage() {
                     {/* Divider */}
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300" />
+                        <div className="w-full border-t border-gray-600" />
                       </div>
                       <div className="relative flex justify-center text-xs sm:text-sm">
-                        <span className="px-2 bg-white text-gray-500">{t('auth.orContinueWith')}</span>
+                        <span className="px-2 bg-gray-800 text-gray-400">{t('auth.orContinueWith')}</span>
                       </div>
                     </div>
 
                     {/* Google Sign In Button */}
                     <motion.button
                       type="button"
+                      onClick={handleGoogleSignIn}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                      className="w-full flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-600 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer"
                     >
                       <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -386,7 +443,7 @@ export default function LoginPage() {
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                       </svg>
-                      <span className="text-sm sm:text-base text-gray-700 font-medium">{t('auth.signInWithGoogle')}</span>
+                      <span className="text-sm sm:text-base text-gray-200 font-medium">{t('auth.signInWithGoogle')}</span>
                     </motion.button>
 
                   </motion.div>
@@ -398,11 +455,11 @@ export default function LoginPage() {
                     transition={{ duration: 0.5, delay: 0.9 }}
                     className="text-center"
                   >
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-300">
                       {t('auth.dontHaveAccount')}{' '}
                       <Link
                         href="/register"
-                        className="text-blue-600 hover:text-blue-500 font-medium"
+                        className="text-blue-400 hover:text-blue-300 font-medium"
                       >
                         {t('auth.signUpHere')}
                       </Link>

@@ -9,6 +9,8 @@ import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
+import { getAuthRedirectUrl } from '@/lib/redirect';
+import { googleAuth } from '@/lib/google-auth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -23,10 +25,7 @@ import {
   User,
   ArrowRight,
   AlertCircle,
-  CheckCircle,
-  Store,
-  Package,
-  Warehouse
+  Package
 } from 'lucide-react';
 
 const registerSchema = z.object({
@@ -35,7 +34,6 @@ const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
-  role: z.enum(['SUPPLIER', 'SELLER']),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -45,7 +43,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: registerUser, isLoading } = useAuth();
+  const { register: registerUser, isLoading, user } = useAuth();
   const { t } = useLanguage();
   const toast = useToastHelpers();
   const [error, setError] = useState<string>('');
@@ -55,16 +53,10 @@ export default function RegisterPage() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: 'SUPPLIER',
-    },
   });
-
-  const selectedRole = watch('role');
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -86,14 +78,10 @@ export default function RegisterPage() {
       
       // Small delay to show the toast before navigation
       setTimeout(() => {
-        // Redirect based on role
-        if (data.role === 'SUPPLIER') {
-          router.push('/supplier');
-        } else if (data.role === 'SELLER') {
-          router.push('/seller');
-        } else {
-          router.push('/dashboard');
-        }
+        // Redirect based on user role
+        const redirectUrl = getAuthRedirectUrl(user);
+        console.log('Redirecting to:', redirectUrl);
+        router.push(redirectUrl);
       }, 1000);
     } catch (err: any) {
       console.error('Registration error:', err);
@@ -110,8 +98,63 @@ export default function RegisterPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('');
+      
+      // Show loading toast
+      toast.info('Signing up with Google...', 'Please complete the Google authentication');
+      
+      const googleResponse = await googleAuth.signIn();
+      
+      // Send Google credential to backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          credential: googleResponse.access_token,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Google authentication failed');
+      }
+
+      const authData = await response.json();
+      
+      // Store the auth data in context
+      localStorage.setItem('access_token', authData.access_token);
+      localStorage.setItem('user', JSON.stringify(authData.user));
+      
+      // Show success toast
+      toast.success(
+        'Welcome!',
+        `Successfully signed up with Google. Redirecting to your dashboard...`
+      );
+      
+      // Redirect to appropriate dashboard
+      setTimeout(() => {
+        const redirectUrl = getAuthRedirectUrl(authData.user);
+        console.log('Redirecting to:', redirectUrl);
+        router.push(redirectUrl);
+      }, 1000);
+      
+    } catch (err: any) {
+      console.error('Google Sign-Up error:', err);
+      const errorMessage = err.message || 'Google authentication failed';
+      setError(errorMessage);
+      
+      toast.error(
+        'Google Sign-Up Failed',
+        errorMessage
+      );
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 flex items-center justify-center p-4">
       {/* Language Switcher */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
@@ -124,9 +167,9 @@ export default function RegisterPage() {
       
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-300/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* Main Container */}
@@ -135,11 +178,11 @@ export default function RegisterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden"
+          className="bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 overflow-hidden"
         >
           <div className="grid lg:grid-cols-2 min-h-[600px]">
             {/* Left Side - Branding */}
-            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 lg:p-12 flex flex-col justify-start pt-16 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-950 p-8 lg:p-12 flex flex-col justify-start pt-16 relative overflow-hidden">
               {/* Background Elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -208,7 +251,7 @@ export default function RegisterPage() {
                       className="flex items-center space-x-3"
                     >
                       <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                        <CheckCircle className="w-4 h-4 text-white" />
+                        <Package className="w-4 h-4 text-white" />
                       </div>
                       <span className="text-white/90 text-sm">{feature}</span>
                     </motion.div>
@@ -226,92 +269,17 @@ export default function RegisterPage() {
                 className="max-w-md mx-auto w-full"
               >
                 {/* Header */}
-                <div className="text-center mb-4">
-                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <div className="text-center mb-6">
+                   <h2 className="text-2xl font-bold text-white mb-2">
                      Create Account
                    </h2>
-                   <p className="text-gray-600">
-                     Choose your role and start managing inventory
+                   <p className="text-gray-300">
+                     Join us and start managing your business
           </p>
         </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-                  {/* Role Selection */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                    className="space-y-3"
-                  >
-                    <label className="block text-sm font-semibold text-gray-700">
-                      I want to join as a...
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Supplier Role */}
-                      <motion.label
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'SUPPLIER'
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                          }`}
-                      >
-                        <input
-                          {...register('role')}
-                          type="radio"
-                          value="SUPPLIER"
-                          className="sr-only"
-                        />
-                        <div className="flex items-start">
-                          <Warehouse className={`w-6 h-6 mr-3 flex-shrink-0 ${selectedRole === 'SUPPLIER' ? 'text-blue-600' : 'text-gray-400'}`} />
-                          <div className="flex-1">
-                            <div className={`font-semibold text-sm mb-1 ${selectedRole === 'SUPPLIER' ? 'text-blue-900' : 'text-gray-900'}`}>
-                              Supplier
-                            </div>
-                            <div className={`text-xs leading-relaxed ${selectedRole === 'SUPPLIER' ? 'text-blue-600' : 'text-gray-500'}`}>
-                              Manage inventory, fulfill orders, and supply products
-                            </div>
-                          </div>
-                        </div>
-                        {selectedRole === 'SUPPLIER' && (
-                          <CheckCircle className="absolute top-2 right-2 w-5 h-5 text-blue-600" />
-                        )}
-                      </motion.label>
-
-                      {/* Seller Role */}
-                      <motion.label
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`relative flex flex-col p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${selectedRole === 'SELLER'
-                          ? 'border-purple-500 bg-purple-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                          }`}
-                      >
-                        <input
-                          {...register('role')}
-                          type="radio"
-                          value="SELLER"
-                          className="sr-only"
-                        />
-                        <div className="flex items-start">
-                          <Store className={`w-6 h-6 mr-3 flex-shrink-0 ${selectedRole === 'SELLER' ? 'text-purple-600' : 'text-gray-400'}`} />
-                          <div className="flex-1">
-                            <div className={`font-semibold text-sm mb-1 ${selectedRole === 'SELLER' ? 'text-purple-900' : 'text-gray-900'}`}>
-                              Seller
-                            </div>
-                            <div className={`text-xs leading-relaxed ${selectedRole === 'SELLER' ? 'text-purple-600' : 'text-gray-500'}`}>
-                              List products, manage sales, and track performance
-                            </div>
-                          </div>
-                        </div>
-                        {selectedRole === 'SELLER' && (
-                          <CheckCircle className="absolute top-2 right-2 w-5 h-5 text-purple-600" />
-                        )}
-                      </motion.label>
-                    </div>
-                  </motion.div>
 
                   {/* Name Fields */}
                   <div className="grid grid-cols-2 gap-4">
@@ -320,7 +288,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.5 }}
                     >
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
                         {t('auth.firstName')}
                       </label>
                       <div className="relative">
@@ -328,8 +296,8 @@ export default function RegisterPage() {
                         <input
                           {...register('firstName')}
                           placeholder="John"
-                          className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 ${
-                            errors.firstName ? 'border-red-500' : 'border-gray-200'
+                          className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
+                            errors.firstName ? 'border-red-500' : ''
                           }`}
                         />
                         {errors.firstName && (
@@ -345,7 +313,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.6 }}
                     >
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
                         {t('auth.lastName')}
                       </label>
                       <div className="relative">
@@ -353,8 +321,8 @@ export default function RegisterPage() {
                         <input
                           {...register('lastName')}
                           placeholder="Doe"
-                          className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 ${
-                            errors.lastName ? 'border-red-500' : 'border-gray-200'
+                          className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
+                            errors.lastName ? 'border-red-500' : ''
                           }`}
                         />
                         {errors.lastName && (
@@ -372,7 +340,7 @@ export default function RegisterPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.7 }}
                   >
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
                       {t('auth.email')}
                     </label>
                     <div className="relative">
@@ -381,8 +349,8 @@ export default function RegisterPage() {
                         {...register('email')}
                         type="email"
                         placeholder="john@example.com"
-                        className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 ${
-                          errors.email ? 'border-red-500' : 'border-gray-200'
+                        className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
+                          errors.email ? 'border-red-500' : ''
                         }`}
                       />
                       {errors.email && (
@@ -400,7 +368,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.8 }}
                     >
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
                         {t('auth.password')}
                       </label>
                       <div className="relative">
@@ -409,14 +377,14 @@ export default function RegisterPage() {
                 {...register('password')}
                           type={showPassword ? 'text' : 'password'}
                           placeholder="Enter password"
-                          className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 ${
-                            errors.password ? 'border-red-500' : 'border-gray-200'
+                          className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
+                            errors.password ? 'border-red-500' : ''
                           }`}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
                         >
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -433,7 +401,7 @@ export default function RegisterPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.9 }}
                     >
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-300 mb-2">
                         {t('auth.confirmPassword')}
                       </label>
                       <div className="relative">
@@ -442,14 +410,14 @@ export default function RegisterPage() {
                 {...register('confirmPassword')}
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="Confirm password"
-                          className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 ${
-                            errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                          className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
+                            errors.confirmPassword ? 'border-red-500' : ''
                           }`}
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 cursor-pointer"
                         >
                           {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -496,20 +464,21 @@ export default function RegisterPage() {
                   >
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-300" />
+                        <div className="w-full border-t border-gray-600" />
                       </div>
                        <div className="relative flex justify-center text-sm">
-                         <span className="px-2 bg-white text-gray-500">{t('auth.orContinueWith')}</span>
+                         <span className="px-2 bg-gray-800 text-gray-400">{t('auth.orContinueWith')}</span>
                        </div>
                     </div>
 
                     <div className="mt-6 space-y-3">
                       {/* Google Sign In */}
                       <motion.button
+                        onClick={handleGoogleSignIn}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="button"
-                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700/50 text-sm font-medium text-gray-200 hover:bg-gray-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors"
                       >
                         <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -527,9 +496,9 @@ export default function RegisterPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="button"
-                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700/50 text-sm font-medium text-gray-200 hover:bg-gray-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors"
                       >
-                        <Mail className="w-5 h-5 mr-3 text-gray-500" />
+                        <Mail className="w-5 h-5 mr-3 text-gray-400" />
                          {t('auth.signInWithEmail')}
                       </motion.button>
                     </div>
@@ -542,11 +511,11 @@ export default function RegisterPage() {
                     transition={{ duration: 0.5, delay: 1.2 }}
                     className="text-center"
                   >
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-300">
                       {t('auth.alreadyHaveAccount')}{' '}
                 <Link
                   href="/login"
-                        className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                        className="font-semibold text-blue-400 hover:text-blue-300 transition-colors"
                 >
                         {t('auth.login')}
                 </Link>

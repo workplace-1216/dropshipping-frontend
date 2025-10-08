@@ -16,6 +16,7 @@
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.22",
+    "google-auth-library": "^10.4.0",
     "i18next": "^25.5.3",
     "lucide-react": "^0.544.0",
     "next": "15.5.4",
