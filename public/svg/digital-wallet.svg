@@ -1,0 +1,21 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientOrange" x1="0" y1="0" x2="80" y2="80">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#EF4444"/>
+    </linearGradient>
+  </defs>
+  <!-- Wallet body -->
+  <rect x="15" y="25" width="50" height="35" rx="4" fill="url(#gradientOrange)" stroke="white" stroke-width="2"/>
+  <!-- Wallet flap -->
+  <path d="M15 25C15 22.7909 16.7909 21 19 21H61C63.2091 21 65 22.7909 65 25V30H15V25Z" fill="url(#gradientOrange)" stroke="white" stroke-width="2"/>
+  <!-- Card slot -->
+  <rect x="20" y="35" width="30" height="18" rx="2" fill="white" opacity="0.3"/>
+  <!-- Dollar sign -->
+  <circle cx="55" cy="48" r="8" fill="white" opacity="0.9"/>
+  <text x="55" y="53" font-family="Arial" font-size="12" font-weight="bold" fill="#F59E0B" text-anchor="middle">$</text>
+  <!-- Coins -->
+  <circle cx="30" cy="65" r="4" fill="#FBBF24" stroke="white" stroke-width="1.5"/>
+  <circle cx="38" cy="65" r="4" fill="#FBBF24" stroke="white" stroke-width="1.5"/>
+</svg>
+

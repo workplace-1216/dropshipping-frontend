@@ -1,0 +1,15 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lightningGrad" x1="0" y1="0" x2="56" y2="56">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+  <!-- Lightning bolt -->
+  <path d="M28 8L18 28H26L22 48L42 28H34L28 8Z" fill="url(#lightningGrad)" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Speed lines -->
+  <path d="M8 20L12 24L8 28" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M44 20L48 24L44 28" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <path d="M8 36L12 40L8 44" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+  <path d="M44 36L48 40L44 44" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+</svg>

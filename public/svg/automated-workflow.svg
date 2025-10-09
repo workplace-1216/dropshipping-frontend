@@ -1,0 +1,21 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="workflowGrad" x1="0" y1="0" x2="20" y2="20">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Main gear -->
+  <circle cx="10" cy="10" r="5" fill="url(#workflowGrad)" stroke="white" stroke-width="1.5"/>
+  <circle cx="10" cy="10" r="2.5" fill="white" opacity="0.9"/>
+  <!-- Gear teeth -->
+  <rect x="9" y="3" width="2" height="2.5" rx="0.5" fill="url(#workflowGrad)"/>
+  <rect x="9" y="14.5" width="2" height="2.5" rx="0.5" fill="url(#workflowGrad)"/>
+  <rect x="3" y="9" width="2.5" height="2" rx="0.5" fill="url(#workflowGrad)"/>
+  <rect x="14.5" y="9" width="2.5" height="2" rx="0.5" fill="url(#workflowGrad)"/>
+  <!-- Workflow arrows -->
+  <path d="M2 5L4 7L2 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <path d="M18 5L16 7L18 9" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <path d="M2 15L4 13L2 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <path d="M18 15L16 13L18 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+</svg>

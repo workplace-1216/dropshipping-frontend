@@ -1,0 +1,32 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="automatedGrad" x1="0" y1="0" x2="56" y2="56">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Main automation gear -->
+  <circle cx="28" cy="28" r="12" fill="url(#automatedGrad)" stroke="white" stroke-width="2"/>
+  <circle cx="28" cy="28" r="6" fill="white" opacity="0.9"/>
+  <!-- Gear teeth -->
+  <rect x="26" y="12" width="4" height="6" rx="1" fill="url(#automatedGrad)"/>
+  <rect x="26" y="38" width="4" height="6" rx="1" fill="url(#automatedGrad)"/>
+  <rect x="12" y="26" width="6" height="4" rx="1" fill="url(#automatedGrad)"/>
+  <rect x="38" y="26" width="6" height="4" rx="1" fill="url(#automatedGrad)"/>
+  <!-- Diagonal teeth -->
+  <rect x="16" y="16" width="4" height="4" rx="1" fill="url(#automatedGrad)" transform="rotate(-45 18 18)"/>
+  <rect x="36" y="16" width="4" height="4" rx="1" fill="url(#automatedGrad)" transform="rotate(45 38 18)"/>
+  <rect x="16" y="36" width="4" height="4" rx="1" fill="url(#automatedGrad)" transform="rotate(45 18 38)"/>
+  <rect x="36" y="36" width="4" height="4" rx="1" fill="url(#automatedGrad)" transform="rotate(-45 38 38)"/>
+  <!-- Circuit pattern -->
+  <rect x="4" y="4" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="8" y="4" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="12" y="4" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="4" y="8" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="4" y="12" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="42" y="42" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="46" y="42" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="50" y="42" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="50" y="46" width="2" height="2" fill="white" opacity="0.3"/>
+  <rect x="50" y="50" width="2" height="2" fill="white" opacity="0.3"/>
+</svg>

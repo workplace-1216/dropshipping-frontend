@@ -1,0 +1,33 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="boletoGrad" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <!-- Bank slip document -->
+  <rect x="8" y="10" width="32" height="28" rx="2" fill="url(#boletoGrad)" stroke="white" stroke-width="2"/>
+  <!-- Header section -->
+  <rect x="8" y="10" width="32" height="6" fill="rgba(0,0,0,0.1)"/>
+  <!-- Document lines -->
+  <line x1="10" y1="18" x2="38" y2="18" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="21" x2="38" y2="21" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="24" x2="38" y2="24" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="27" x2="38" y2="27" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="30" x2="38" y2="30" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="33" x2="38" y2="33" stroke="white" stroke-width="1.5" opacity="0.7"/>
+  <!-- Barcode pattern -->
+  <rect x="10" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="12" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="14" y="34" width="2" height="4" fill="white" opacity="0.8"/>
+  <rect x="17" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="19" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="21" y="34" width="3" height="4" fill="white" opacity="0.8"/>
+  <rect x="25" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="27" y="34" width="2" height="4" fill="white" opacity="0.8"/>
+  <rect x="30" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="32" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="34" y="34" width="1" height="4" fill="white" opacity="0.8"/>
+  <rect x="36" y="34" width="2" height="4" fill="white" opacity="0.8"/>
+</svg>
+

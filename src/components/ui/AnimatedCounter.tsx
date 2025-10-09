@@ -93,7 +93,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   }, [value, spring, hasAnimated]);
 
   return (
-    <motion.div
+    <motion.span
       ref={ref}
       className={`inline-block ${className}`}
       initial={{ opacity: 0, scale: 0.8 }}
@@ -105,7 +105,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
         <motion.span>{display}</motion.span>
         {suffix}
       </motion.span>
-    </motion.div>
+    </motion.span>
   );
 };
 

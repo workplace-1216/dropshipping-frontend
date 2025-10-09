@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="url(#gradient4)"/>
+  <defs>
+    <linearGradient id="gradient4" x1="0" y1="0" x2="64" y2="64">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#EF4444"/>
+    </linearGradient>
+  </defs>
+  <!-- Document/Invoice -->
+  <rect x="20" y="14" width="24" height="36" rx="3" fill="white"/>
+  <!-- Lines on document -->
+  <line x1="24" y1="22" x2="40" y2="22" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="28" x2="36" y2="28" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="34" x2="40" y2="34" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="40" x2="32" y2="40" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <!-- Lightning bolt for instant -->
+  <path d="M48 20L42 32L46 32L40 44L46 32L42 32L48 20Z" fill="#FBBF24" stroke="white" stroke-width="1.5"/>
+  <!-- Dollar sign -->
+  <circle cx="28" cy="44" r="4" fill="#F59E0B"/>
+  <text x="28" y="47" font-family="Arial" font-size="6" font-weight="bold" fill="white" text-anchor="middle">$</text>
+</svg>
+

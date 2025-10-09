@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Workana Hourly - Marketplace Platform",
+  title: "Marketplace Platform",
   description: "A comprehensive dropshipping and marketplace platform",
 };
 

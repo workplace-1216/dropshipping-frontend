@@ -1,0 +1,17 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="multiMarketGrad" x1="0" y1="0" x2="24" y2="24">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#0EA5E9"/>
+    </linearGradient>
+  </defs>
+  <!-- Globe -->
+  <circle cx="12" cy="12" r="9" stroke="url(#multiMarketGrad)" stroke-width="2" fill="none"/>
+  <ellipse cx="12" cy="12" rx="4.5" ry="9" stroke="url(#multiMarketGrad)" stroke-width="2" fill="none"/>
+  <line x1="12" y1="3" x2="12" y2="21" stroke="url(#multiMarketGrad)" stroke-width="2"/>
+  <line x1="3" y1="12" x2="21" y2="12" stroke="url(#multiMarketGrad)" stroke-width="2"/>
+  <!-- Shopping carts -->
+  <path d="M6 8L8 8L10 16L18 16L20 8L22 8" stroke="url(#multiMarketGrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="12" cy="18" r="1.5" fill="url(#multiMarketGrad)"/>
+  <circle cx="16" cy="18" r="1.5" fill="url(#multiMarketGrad)"/>
+</svg>

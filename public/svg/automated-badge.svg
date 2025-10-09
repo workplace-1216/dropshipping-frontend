@@ -1,0 +1,18 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="autoBadgeGrad" x1="0" y1="0" x2="24" y2="24">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Main gear -->
+  <circle cx="12" cy="12" r="6" fill="url(#autoBadgeGrad)" stroke="white" stroke-width="1.5"/>
+  <circle cx="12" cy="12" r="3" fill="white" opacity="0.9"/>
+  <!-- Gear teeth -->
+  <rect x="11" y="4" width="2" height="3" rx="0.5" fill="url(#autoBadgeGrad)"/>
+  <rect x="11" y="17" width="2" height="3" rx="0.5" fill="url(#autoBadgeGrad)"/>
+  <rect x="4" y="11" width="3" height="2" rx="0.5" fill="url(#autoBadgeGrad)"/>
+  <rect x="17" y="11" width="3" height="2" rx="0.5" fill="url(#autoBadgeGrad)"/>
+  <!-- Lightning bolt -->
+  <path d="M10 6L8 10H10L8 16H14L12 10H14L12 6H10Z" fill="white" opacity="0.8"/>
+</svg>

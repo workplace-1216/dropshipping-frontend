@@ -13,6 +13,11 @@ export function getDashboardUrl(user: User | null): string {
     return '/login';
   }
 
+  // Special case: admin email always goes to admin dashboard
+  if (user.email === 'admin@admin.com') {
+    return '/admin';
+  }
+
   switch (user.role) {
     case 'ADMIN':
       return '/admin';

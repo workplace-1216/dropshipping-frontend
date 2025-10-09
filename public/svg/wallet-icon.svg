@@ -1,0 +1,17 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="walletGrad" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Wallet -->
+  <rect x="8" y="12" width="32" height="24" rx="3" fill="url(#walletGrad)"/>
+  <path d="M8 16C8 13.7909 9.79086 12 12 12H36C38.2091 12 40 13.7909 40 16V20H8V16Z" fill="url(#walletGrad)" opacity="0.8"/>
+  <!-- Card -->
+  <rect x="12" y="22" width="18" height="10" rx="1.5" fill="white" opacity="0.3"/>
+  <!-- Dollar -->
+  <circle cx="35" cy="28" r="5" fill="white"/>
+  <text x="35" y="31" font-family="Arial" font-size="8" font-weight="bold" fill="#10B981" text-anchor="middle">$</text>
+</svg>
+

@@ -1,0 +1,22 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="paletteGrad" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#DB2777"/>
+    </linearGradient>
+  </defs>
+  <!-- Palette shape -->
+  <ellipse cx="21" cy="24" rx="15" ry="17" fill="url(#paletteGrad)" stroke="white" stroke-width="2"/>
+  <!-- Thumb hole -->
+  <ellipse cx="30" cy="33" rx="5" ry="6" fill="#1F2937" stroke="white" stroke-width="1.5"/>
+  <!-- Paint colors -->
+  <circle cx="15" cy="17" r="3" fill="#EF4444"/>
+  <circle cx="21" cy="13" r="3" fill="#F59E0B"/>
+  <circle cx="27" cy="17" r="3" fill="#10B981"/>
+  <circle cx="15" cy="25" r="3" fill="#3B82F6"/>
+  <circle cx="25" cy="24" r="3" fill="#8B5CF6"/>
+  <!-- Brush -->
+  <rect x="33" y="9" width="2.5" height="15" rx="1.5" fill="#EC4899" stroke="white" stroke-width="1"/>
+  <path d="M32 22L37 22L36 28L33 28Z" fill="white" stroke="#EC4899" stroke-width="1"/>
+</svg>
+

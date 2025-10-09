@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="16" fill="url(#gradient1)"/>
+  <defs>
+    <linearGradient id="gradient1" x1="0" y1="0" x2="64" y2="64">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Shopping Cart -->
+  <path d="M20 20L24 20L28 40L48 40" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="30" cy="46" r="3" fill="white"/>
+  <circle cx="44" cy="46" r="3" fill="white"/>
+  <path d="M24 20L26 28L44 28L48 20" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Checkmark -->
+  <circle cx="44" cy="24" r="8" fill="#10B981" stroke="white" stroke-width="2"/>
+  <path d="M40 24L43 27L48 22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+

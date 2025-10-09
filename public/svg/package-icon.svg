@@ -1,0 +1,11 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Package box -->
+  <path d="M8 14L20 8L32 14V28L20 34L8 28V14Z" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Center line -->
+  <line x1="20" y1="8" x2="20" y2="34" stroke="white" stroke-width="2" opacity="0.5"/>
+  <!-- Top edges -->
+  <path d="M8 14L20 20L32 14" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Tape -->
+  <line x1="20" y1="20" x2="20" y2="28" stroke="white" stroke-width="3" opacity="0.3"/>
+</svg>
+

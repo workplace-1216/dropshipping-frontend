@@ -1,0 +1,14 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientGreen" x1="0" y1="0" x2="80" y2="80">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Lightning bolt -->
+  <path d="M45 10L25 40H40L35 70L55 35H40L45 10Z" fill="url(#gradientGreen)" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Energy waves -->
+  <circle cx="40" cy="40" r="32" stroke="url(#gradientGreen)" stroke-width="2" stroke-dasharray="4 4" opacity="0.5"/>
+  <circle cx="40" cy="40" r="38" stroke="url(#gradientGreen)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.3"/>
+</svg>
+

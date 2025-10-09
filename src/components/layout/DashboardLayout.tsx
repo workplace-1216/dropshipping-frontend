@@ -35,7 +35,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const { t } = useLanguage();
   const router = useRouter();
 
-  const navigation = [
+  const isAdmin = user?.email === 'admin@admin.com';
+  
+  const navigation = isAdmin ? [
+    { name: 'Admin Dashboard', href: '/admin', icon: Home },
+    { name: 'All Users', href: '/admin/users', icon: Users },
+    { name: 'All Products', href: '/admin/products', icon: Package },
+    { name: 'All Orders', href: '/admin/orders', icon: ShoppingBag },
+    { name: 'System Settings', href: '/admin/settings', icon: Settings },
+  ] : [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Orders', href: '/orders', icon: ShoppingBag },
@@ -53,7 +61,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Mobile sidebar backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -61,92 +69,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
+            className="fixed inset-0 z-40 bg-black bg-opacity-75 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
-      <motion.div
-        initial={false}
-        animate={{ x: sidebarOpen ? 0 : '-100%' }}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg lg:translate-x-0 lg:static lg:inset-0"
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">DH</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">Dropship Hub</span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              return (
-                <motion.a
-                  key={item.name}
-                  href={item.href}
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center space-x-3 px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </motion.a>
-              );
-            })}
-          </nav>
-
-          {/* User section */}
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Sign out</span>
-            </button>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="">
         {/* Top header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-gray-800 shadow-sm border-b border-gray-700">
           <div className="flex h-16 items-center justify-between px-6">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700"
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
+              <h1 className="text-xl font-semibold text-white">
+                {isAdmin ? 'Admin Panel' : 'Dashboard'}
+              </h1>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -157,13 +100,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   />
                 </div>
               </div>
 
               {/* Notifications */}
-              <button className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 relative">
+              <button className="p-2 rounded-md text-gray-400 hover:text-gray-200 hover:bg-gray-700 relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
@@ -172,24 +115,33 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               <LanguageSwitcher />
 
               {/* User menu */}
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 bg-gray-700/50 rounded-lg p-2 border border-gray-600/50">
                 <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-white">
                     {user?.firstName} {user?.lastName}
                   </p>
-                  <p className="text-xs text-gray-500">{user?.role}</p>
+                  <p className="text-xs text-gray-400">{user?.role}</p>
                 </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+                  title="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="p-6">
-          {children}
+        <main className="p-8 bg-gray-900 min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

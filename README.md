@@ -1,4 +1,4 @@
-# Workana Hourly - Frontend
+# Dropshipping - Frontend
 
 ## 🚀 Quick Start
 

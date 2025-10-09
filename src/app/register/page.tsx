@@ -49,6 +49,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -61,6 +62,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
+      setIsSubmitting(true);
       console.log('Starting registration with data:', { ...data, password: '***', confirmPassword: '***' });
       
       const { confirmPassword, ...registerData } = data;
@@ -84,6 +86,7 @@ export default function RegisterPage() {
         router.push(redirectUrl);
       }, 1000);
     } catch (err: unknown) {
+      setIsSubmitting(false);
       console.error('Registration error:', err);
       const errorResponse = (err as { response?: { data?: unknown } })?.response?.data;
       console.error('Error response:', errorResponse);
@@ -144,6 +147,7 @@ export default function RegisterPage() {
       }, 1000);
       
     } catch (err: unknown) {
+      setIsSubmitting(false);
       console.error('Google Sign-Up error:', err);
       const errorMessage = (err as { message?: string })?.message || 'Google authentication failed';
       setError(errorMessage);
@@ -438,23 +442,37 @@ export default function RegisterPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.0 }}
                   >
-                    <GradientButton
+                    <button
                       type="submit"
-                      className="w-full h-12 text-lg font-semibold cursor-pointer"
-                      disabled={isLoading}
+                      disabled={isSubmitting}
+                      className="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center space-x-2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                           <span>{t('auth.creatingAccount')}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center space-x-2">
-                          <span>{t('auth.createAccount')}</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </div>
-                      )}
-                    </GradientButton>
+                      {/* Background Animation */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      {/* Content */}
+                      <span className="relative flex items-center justify-center space-x-3">
+                        {isSubmitting ? (
+                          <>
+                            {/* Modern Loading Spinner */}
+                            <div className="relative w-5 h-5">
+                              {/* Outer ring */}
+                              <div className="absolute inset-0 border-2 border-white/30 rounded-full"></div>
+                              {/* Spinning arc */}
+                              <div className="absolute inset-0 border-2 border-transparent border-t-white border-r-white rounded-full animate-spin"></div>
+                              {/* Inner pulse */}
+                              <div className="absolute inset-1 bg-white/20 rounded-full animate-pulse"></div>
+                            </div>
+                            <span className="animate-pulse">{t('auth.creatingAccount')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>{t('auth.createAccount')}</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                          </>
+                        )}
+                      </span>
+                    </button>
                   </motion.div>
 
                   {/* Social Login Buttons */}

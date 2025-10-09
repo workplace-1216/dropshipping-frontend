@@ -1,0 +1,19 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scaleGrad" x1="0" y1="0" x2="48" y2="48">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Growth chart bars -->
+  <rect x="8" y="30" width="6" height="10" rx="2" fill="url(#scaleGrad)" opacity="0.5"/>
+  <rect x="16" y="24" width="6" height="16" rx="2" fill="url(#scaleGrad)" opacity="0.7"/>
+  <rect x="24" y="18" width="6" height="22" rx="2" fill="url(#scaleGrad)" opacity="0.85"/>
+  <rect x="32" y="10" width="6" height="30" rx="2" fill="url(#scaleGrad)"/>
+  <!-- Arrow up -->
+  <path d="M36 6L42 12L36 12V6Z" fill="#10B981"/>
+  <line x1="39" y1="12" x2="39" y2="18" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Growth line -->
+  <path d="M8 35L16 27L24 21L32 13L38 8" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>
+

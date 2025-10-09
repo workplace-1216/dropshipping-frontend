@@ -1,0 +1,23 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="56" y2="56">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <!-- Main shield -->
+  <path d="M28 8L14 16V28C14 38.5 20.5 47.5 28 50C35.5 47.5 42 38.5 42 28V16L28 8Z" fill="url(#shieldGrad)" stroke="white" stroke-width="2"/>
+  <!-- Checkmark -->
+  <path d="M20 28L26 34L36 20" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- AI circuit pattern -->
+  <circle cx="8" cy="8" r="2" fill="white" opacity="0.4"/>
+  <circle cx="12" cy="8" r="2" fill="white" opacity="0.4"/>
+  <circle cx="8" cy="12" r="2" fill="white" opacity="0.4"/>
+  <line x1="8" y1="8" x2="12" y2="8" stroke="white" stroke-width="1" opacity="0.4"/>
+  <line x1="8" y1="8" x2="8" y2="12" stroke="white" stroke-width="1" opacity="0.4"/>
+  <circle cx="44" cy="44" r="2" fill="white" opacity="0.4"/>
+  <circle cx="48" cy="44" r="2" fill="white" opacity="0.4"/>
+  <circle cx="44" cy="48" r="2" fill="white" opacity="0.4"/>
+  <line x1="44" y1="44" x2="48" y2="44" stroke="white" stroke-width="1" opacity="0.4"/>
+  <line x1="44" y1="44" x2="44" y2="48" stroke="white" stroke-width="1" opacity="0.4"/>
+</svg>

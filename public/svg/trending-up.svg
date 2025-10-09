@@ -1,0 +1,11 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Upward trend line -->
+  <path d="M5 30L15 20L22 25L35 10" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Arrow -->
+  <path d="M28 10L35 10L35 17" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Data points -->
+  <circle cx="15" cy="20" r="3" fill="white"/>
+  <circle cx="22" cy="25" r="3" fill="white"/>
+  <circle cx="35" cy="10" r="3" fill="white"/>
+</svg>
+

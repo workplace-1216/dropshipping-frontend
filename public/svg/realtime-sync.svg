@@ -1,0 +1,22 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradientIndigo" x1="0" y1="0" x2="80" y2="80">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <!-- Circular refresh arrows -->
+  <path d="M40 15C50.4934 15 59.2893 21.7157 62.0711 31" stroke="url(#gradientIndigo)" stroke-width="4" stroke-linecap="round"/>
+  <path d="M40 65C29.5066 65 20.7107 58.2843 17.9289 49" stroke="url(#gradientIndigo)" stroke-width="4" stroke-linecap="round"/>
+  <!-- Arrow heads -->
+  <path d="M62 31L67 28L65 35Z" fill="#6366F1"/>
+  <path d="M18 49L13 52L15 45Z" fill="#6366F1"/>
+  <!-- Data sync waves -->
+  <circle cx="40" cy="40" r="12" fill="url(#gradientIndigo)" opacity="0.3"/>
+  <circle cx="40" cy="40" r="8" fill="url(#gradientIndigo)" opacity="0.5"/>
+  <circle cx="40" cy="40" r="4" fill="white"/>
+  <!-- Pulse rings -->
+  <circle cx="40" cy="40" r="20" stroke="url(#gradientIndigo)" stroke-width="2" opacity="0.4" stroke-dasharray="2 2"/>
+  <circle cx="40" cy="40" r="26" stroke="url(#gradientIndigo)" stroke-width="1.5" opacity="0.2" stroke-dasharray="3 3"/>
+</svg>
+

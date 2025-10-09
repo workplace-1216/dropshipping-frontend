@@ -1,0 +1,23 @@
+<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="56" y2="56">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <!-- Card -->
+  <rect x="8" y="16" width="40" height="24" rx="4" fill="url(#cardGrad)" stroke="white" stroke-width="2"/>
+  <!-- Magnetic stripe -->
+  <rect x="8" y="22" width="40" height="4" fill="white" opacity="0.3"/>
+  <!-- Chip -->
+  <rect x="14" y="30" width="8" height="6" rx="1" fill="white" opacity="0.5"/>
+  <!-- Card number dots -->
+  <circle cx="26" cy="33" r="1" fill="white" opacity="0.7"/>
+  <circle cx="29" cy="33" r="1" fill="white" opacity="0.7"/>
+  <circle cx="32" cy="33" r="1" fill="white" opacity="0.7"/>
+  <circle cx="35" cy="33" r="1" fill="white" opacity="0.7"/>
+  <!-- Contactless symbol -->
+  <path d="M38 32C38 30 37 29 36 29" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M40 32C40 28 38 26 36 26" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+</svg>
+
