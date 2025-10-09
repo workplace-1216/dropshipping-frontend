@@ -393,7 +393,7 @@ export default function Home() {
                   style={{ transform: 'rotate(25deg)' }}
                 >
                   <img src="/svg/multi-marketplace.svg" alt="Multi-Marketplace" className="w-6 h-6" />
-                  <span className="text-blue-100 font-medium">Multi-Marketplace</span>
+                  <span className="text-blue-100 font-medium">{t('home.multiMarketplace')}</span>
                 </motion.div>
 
                 {/* Badge 2 - Automated (Bottom Left) */}
@@ -405,7 +405,7 @@ export default function Home() {
                   style={{ transform: 'translateX(-50%) rotate(18deg)' }}
                 >
                   <img src="/svg/automated-badge.svg" alt="Automated" className="w-6 h-6" />
-                  <span className="text-green-100 font-medium">Automated</span>
+                  <span className="text-green-100 font-medium">{t('home.automated')}</span>
                 </motion.div>
 
                 {/* Badge 3 - Secure (Bottom Right) */}
@@ -417,7 +417,7 @@ export default function Home() {
                   style={{ transform: 'translateX(50%) rotate(-22deg)' }}
                 >
                   <img src="/svg/secure-badge.svg" alt="Secure" className="w-6 h-6" />
-                  <span className="text-purple-100 font-medium">Secure</span>
+                  <span className="text-purple-100 font-medium">{t('home.secure')}</span>
                 </motion.div>
 
                 {/* Badge 4 - Scalable (Right Top) */}
@@ -429,7 +429,7 @@ export default function Home() {
                   style={{ transform: 'rotate(-28deg)' }}
                 >
                   <img src="/svg/scalable-badge.svg" alt="Scalable" className="w-6 h-6" />
-                  <span className="text-orange-100 font-medium">Scalable</span>
+                  <span className="text-orange-100 font-medium">{t('home.scalable')}</span>
                 </motion.div>
               </div>
             </motion.div>
@@ -1195,7 +1195,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center space-x-2 bg-blue-500/20 rounded-full px-4 py-2 mb-6">
                 <DollarSign className="w-5 h-5 text-blue-400" />
-                <span className="text-sm font-semibold text-blue-400">Plans & Subscriptions</span>
+                <span className="text-sm font-semibold text-blue-400">{t('home.plansAndSubscriptions')}</span>
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold mb-4">

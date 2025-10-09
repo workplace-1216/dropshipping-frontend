@@ -32,6 +32,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   const {
     register,
@@ -88,7 +89,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       setError('');
-      setIsSubmitting(true);
+      setIsGoogleSubmitting(true);
       
       // Show loading toast
       toast.info('Signing in with Google...', 'Please complete the Google authentication');
@@ -139,7 +140,7 @@ export default function LoginPage() {
         errorMessage
       );
     } finally {
-      setIsSubmitting(false);
+      setIsGoogleSubmitting(false);
     }
   };
 
@@ -407,7 +408,7 @@ export default function LoginPage() {
                   >
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isGoogleSubmitting}
                       className="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {/* Background Animation */}
@@ -459,17 +460,17 @@ export default function LoginPage() {
                     <motion.button
                       type="button"
                       onClick={handleGoogleSignIn}
-                      disabled={isSubmitting}
-                      whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                      whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                      disabled={isSubmitting || isGoogleSubmitting}
+                      whileHover={{ scale: (isSubmitting || isGoogleSubmitting) ? 1 : 1.02 }}
+                      whileTap={{ scale: (isSubmitting || isGoogleSubmitting) ? 1 : 0.98 }}
                       className="w-full flex items-center justify-center px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-600 rounded-lg bg-gray-700/50 hover:bg-gray-600/50 transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                     >
                       {/* Shimmer effect when loading */}
-                      {isSubmitting && (
+                      {isGoogleSubmitting && (
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
                       )}
                       
-                      {isSubmitting ? (
+                      {isGoogleSubmitting ? (
                         <>
                           <div className="relative w-5 h-5 mr-3">
                             <div className="absolute inset-0 border-2 border-gray-400/30 rounded-full"></div>

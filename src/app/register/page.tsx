@@ -240,10 +240,10 @@ export default function RegisterPage() {
                  {/* Features */}
                  <div className="space-y-4 mt-0 pl-[20%] sm:pl-[30%] md:pl-[36%] lg:px-20 xl:px-24 2xl:px-24">
                    {[
-                     'Multi-tenant inventory management',
-                     'Real-time order tracking',
-                     'Automated alerts & reporting',
-                     'Secure payment processing'
+                     t('home.multiTenantInventory'),
+                     t('home.realTimeOrderTracking'),
+                     t('home.automatedAlertsReporting'),
+                     t('home.securePaymentProcessing')
                    ].map((feature, index) => (
                     <motion.div
                       key={feature}

@@ -41,7 +41,7 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000' || 'https://dropshipping-backend-production.up.railway.app/';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://dropshipping-backend-production.up.railway.app/';
     
     this.client = axios.create({
       baseURL: this.baseURL,
