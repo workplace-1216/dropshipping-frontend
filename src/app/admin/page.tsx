@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,6 +57,7 @@ import {
 
 function AdminDashboard() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeModule, setActiveModule] = useState('overview');
@@ -129,8 +132,8 @@ function AdminDashboard() {
 
   // Navigation modules for admin dashboard
   const modules = [
-    { id: 'overview', name: 'Overview', icon: BarChart3, color: 'blue' },
-    { id: 'suppliers', name: 'Multi-Tenant Suppliers', icon: Building2, color: 'green' },
+    { id: 'overview', name: t('admin.overview'), icon: BarChart3, color: 'blue' },
+    { id: 'suppliers', name: t('admin.multiTenantSuppliers'), icon: Building2, color: 'green' },
     { id: 'rbac', name: 'RBAC Management', icon: Shield, color: 'purple' },
     { id: 'picking', name: 'Picking & Packing', icon: Package, color: 'orange' },
     { id: 'marketplaces', name: 'Marketplace Integration', icon: Globe, color: 'cyan' },
@@ -190,7 +193,7 @@ function AdminDashboard() {
 
   return (
     <>
-      <PageLoader isLoading={pageLoading || isLoading} message="Loading Admin Dashboard..." />
+      <PageLoader isLoading={pageLoading || isLoading} message={t('admin.loadingDashboard')} />
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Header - Fixed */}
@@ -209,9 +212,9 @@ function AdminDashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  Admin Control Panel
+                  {t('admin.controlPanel')}
                 </h1>
-                <p className="text-xs text-slate-400">Platform Management</p>
+                <p className="text-xs text-slate-400">{t('admin.platformManagement')}</p>
               </div>
             </div>
           </div>
@@ -222,7 +225,7 @@ function AdminDashboard() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search modules, suppliers, orders..."
+                  placeholder={t('admin.searchModules')}
                   className="pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-sm text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none backdrop-blur-sm transition-all duration-200 w-64"
                 />
               </div>
@@ -232,6 +235,9 @@ function AdminDashboard() {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse"></span>
             </button>
+
+            {/* Language Switcher */}
+            <LanguageSwitcher />
 
             <div className="flex items-center space-x-3 bg-slate-800/30 rounded-xl p-2 border border-slate-700/50">
               <div className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -374,7 +380,7 @@ function AdminDashboard() {
                       >
                         <div className="relative z-10">
                           <h1 className="text-4xl font-bold text-white mb-2">
-                            Welcome Back, {user?.firstName}! 👋
+                            {t('admin.welcomeBack')}, {user?.firstName}! 👋
                           </h1>
                           <p className="text-xl text-blue-100 mb-6">
                             Here&apos;s everything happening across your dropshipping empire
@@ -462,11 +468,11 @@ function AdminDashboard() {
                           </div>
                           <div className="space-y-4">
                             {[
-                              { icon: Building2, text: 'New supplier "TechSupply Pro" onboarded successfully', time: '2 min ago', color: 'emerald' },
-                              { icon: ShoppingCart, text: 'Batch of 47 orders processed automatically', time: '5 min ago', color: 'blue' },
-                              { icon: DollarSign, text: '$12,450 commission payout completed', time: '8 min ago', color: 'purple' },
-                              { icon: AlertCircle, text: 'Low inventory alert for 5 products', time: '12 min ago', color: 'yellow' },
-                              { icon: Globe, text: 'Mercado Livre API sync completed', time: '15 min ago', color: 'cyan' },
+                              { icon: Building2, text: t('admin.newSupplierOnboarded'), time: `2 ${t('admin.minAgo')}`, color: 'emerald' },
+                              { icon: ShoppingCart, text: t('admin.batchOrdersProcessed'), time: `5 ${t('admin.minAgo')}`, color: 'blue' },
+                              { icon: DollarSign, text: t('admin.commissionPayoutCompleted'), time: `8 ${t('admin.minAgo')}`, color: 'purple' },
+                              { icon: AlertCircle, text: t('admin.lowInventoryAlert'), time: `12 ${t('admin.minAgo')}`, color: 'yellow' },
+                              { icon: Globe, text: t('admin.apiSyncCompleted'), time: `15 ${t('admin.minAgo')}`, color: 'cyan' },
                               { icon: Shield, text: 'Security audit passed - no issues found', time: '1 hour ago', color: 'green' }
                             ].map((activity, index) => (
                               <motion.div
@@ -519,11 +525,11 @@ function AdminDashboard() {
 
                           {/* Quick Actions */}
                           <div className="rounded-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 shadow-xl">
-                            <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
+                            <h3 className="text-lg font-bold text-white mb-4">{t('admin.quickActions')}</h3>
                             <div className="space-y-3">
                               {[
                                 { icon: Plus, text: 'Add New Supplier', color: 'emerald' },
-                                { icon: Settings, text: 'System Settings', color: 'blue' },
+                                { icon: Settings, text: t('admin.systemSettings'), color: 'blue' },
                                 { icon: BarChart3, text: 'View Reports', color: 'purple' },
                                 { icon: Shield, text: 'Security Audit', color: 'orange' }
                               ].map((action, index) => (
@@ -548,7 +554,7 @@ function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Multi-Tenant Supplier Management
+                            {t('admin.supplierManagement')}
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">Manage isolated supplier environments and their configurations</p>
                         </div>
@@ -568,7 +574,7 @@ function AdminDashboard() {
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-slate-400">Total Suppliers</p>
+                              <p className="text-sm font-medium text-slate-400">{t('admin.totalSuppliers')}</p>
                               <p className="text-3xl font-bold text-white mt-1">156</p>
                               <p className="text-xs text-emerald-400 mt-1">+12 this month</p>
                             </div>
@@ -585,7 +591,7 @@ function AdminDashboard() {
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-slate-400">Active Suppliers</p>
+                              <p className="text-sm font-medium text-slate-400">{t('admin.activeSuppliers')}</p>
                               <p className="text-3xl font-bold text-white mt-1">142</p>
                               <p className="text-xs text-blue-400 mt-1">91% active rate</p>
                             </div>
@@ -639,7 +645,7 @@ function AdminDashboard() {
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                               <input
                                 type="text"
-                                placeholder="Search suppliers..."
+                                placeholder={t('admin.searchSuppliers')}
                                 className="pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-sm text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none backdrop-blur-sm transition-all duration-200 w-64"
                               />
                             </div>
@@ -1384,12 +1390,12 @@ function AdminDashboard() {
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                               <input
                                 type="text"
-                                placeholder="Search products..."
+                                placeholder={t('admin.searchProducts')}
                                 className="pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-xl text-sm text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                               />
                             </div>
                             <select className="px-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-xl text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                              <option value="">All Suppliers</option>
+                              <option value="">{t('admin.allSuppliers')}</option>
                               <option value="supplier1">TechSupply Pro</option>
                               <option value="supplier2">Global Electronics</option>
                               <option value="supplier3">Fashion Forward</option>

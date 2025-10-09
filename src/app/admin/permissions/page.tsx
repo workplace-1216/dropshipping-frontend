@@ -7,7 +7,9 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { motion } from 'framer-motion';
@@ -32,6 +34,7 @@ import {
 
 export default function PermissionsManagement() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState('Admin');
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +63,7 @@ export default function PermissionsManagement() {
   }
 
   if (isLoading) {
-    return <PageLoader isLoading={true} message="Loading Permissions..." />;
+    return <PageLoader isLoading={true} message={t('admin.loadingPermissions')} />;
   }
 
   const roles = [
@@ -71,12 +74,12 @@ export default function PermissionsManagement() {
   ];
 
   const permissionCategories = [
-    { id: 'users', name: 'User Management', icon: Users, color: 'blue' },
-    { id: 'products', name: 'Product Management', icon: Package, color: 'green' },
-    { id: 'orders', name: 'Order Management', icon: ShoppingCart, color: 'orange' },
-    { id: 'finance', name: 'Financial', icon: DollarSign, color: 'emerald' },
-    { id: 'settings', name: 'System Settings', icon: Settings, color: 'purple' },
-    { id: 'reports', name: 'Reports & Analytics', icon: FileText, color: 'indigo' }
+    { id: 'users', name: t('admin.userManagement'), icon: Users, color: 'blue' },
+    { id: 'products', name: t('admin.productManagement'), icon: Package, color: 'green' },
+    { id: 'orders', name: t('admin.orderManagement'), icon: ShoppingCart, color: 'orange' },
+    { id: 'finance', name: t('admin.financial'), icon: DollarSign, color: 'emerald' },
+    { id: 'settings', name: t('admin.systemSettings'), icon: Settings, color: 'purple' },
+    { id: 'reports', name: t('admin.reportsAnalytics'), icon: FileText, color: 'indigo' }
   ];
 
   const permissions = [
@@ -140,20 +143,25 @@ export default function PermissionsManagement() {
               className="flex items-center space-x-2 text-slate-400 hover:text-white transition-colors mb-6 group"
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Back to Admin Dashboard</span>
+              <span>{t('admin.backToAdmin')}</span>
             </button>
 
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-2">
-                  Permission Management
+                  {t('admin.permissions')}
                 </h1>
-                <p className="text-slate-400">Configure role-based access control permissions</p>
+                <p className="text-slate-400">{t('admin.configureRoleBasedAccess')}</p>
               </div>
-              <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                <Save className="w-5 h-5" />
-                <span>Save Changes</span>
-              </button>
+              <div className="flex items-center space-x-4">
+                {/* Language Switcher */}
+                <LanguageSwitcher />
+                
+                <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
+                  <Save className="w-5 h-5" />
+                  <span>{t('admin.saveChanges')}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -186,7 +194,7 @@ export default function PermissionsManagement() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search permissions..."
+                placeholder={t('admin.searchPermissions')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none"
@@ -199,7 +207,7 @@ export default function PermissionsManagement() {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className="pl-10 pr-8 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none appearance-none cursor-pointer"
               >
-                <option value="All">All Categories</option>
+                <option value="All">{t('admin.allCategories')}</option>
                 {permissionCategories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}

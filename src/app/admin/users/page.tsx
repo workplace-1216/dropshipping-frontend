@@ -18,7 +18,9 @@ interface User {
   updatedAt: string;
 }
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { motion } from 'framer-motion';
@@ -40,6 +42,7 @@ import {
 
 function AllUsersContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const roleFilter = searchParams.get('role') || 'all';
@@ -130,11 +133,11 @@ function AllUsersContent() {
   }
   
   const roles = [
-    { id: 'all', name: 'All Users', icon: Users, color: 'from-gray-500 to-gray-600', count: totalUsers },
-    { id: 'admin', name: 'Admins', icon: Shield, color: 'from-purple-500 to-purple-600', count: usersByRole.ADMIN || 0 },
-    { id: 'operator', name: 'Operators', icon: Settings, color: 'from-blue-500 to-blue-600', count: usersByRole.OPERATOR || 0 },
-    { id: 'supplier', name: 'Suppliers', icon: Building2, color: 'from-green-500 to-green-600', count: usersByRole.SUPPLIER || 0 },
-    { id: 'seller', name: 'Sellers', icon: ShoppingBag, color: 'from-orange-500 to-orange-600', count: usersByRole.SELLER || 0 }
+    { id: 'all', name: t('admin.allUsers'), icon: Users, color: 'from-gray-500 to-gray-600', count: totalUsers },
+    { id: 'admin', name: t('admin.admins'), icon: Shield, color: 'from-purple-500 to-purple-600', count: usersByRole.ADMIN || 0 },
+    { id: 'operator', name: t('admin.operators'), icon: Settings, color: 'from-blue-500 to-blue-600', count: usersByRole.OPERATOR || 0 },
+    { id: 'supplier', name: t('admin.suppliers'), icon: Building2, color: 'from-green-500 to-green-600', count: usersByRole.SUPPLIER || 0 },
+    { id: 'seller', name: t('admin.sellers'), icon: ShoppingBag, color: 'from-orange-500 to-orange-600', count: usersByRole.SELLER || 0 }
   ];
 
   const filteredUsers = users.filter(user => {
@@ -224,7 +227,7 @@ function AllUsersContent() {
 
   return (
     <ProtectedRoute>
-      <PageLoader isLoading={isLoading || loading} message="Loading Users..." />
+      <PageLoader isLoading={isLoading || loading} message={t('admin.loadingUsers')} />
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 p-8">
         <div className="max-w-7xl mx-auto">
@@ -235,23 +238,28 @@ function AllUsersContent() {
               className="flex items-center space-x-2 text-slate-400 hover:text-white transition-colors mb-6 group"
             >
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Back to Admin Dashboard</span>
+              <span>{t('admin.backToAdmin')}</span>
             </button>
 
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent mb-2">
-                  User Management
+                  {t('admin.userManagement')}
                 </h1>
-                <p className="text-slate-400">Manage all platform users and their permissions</p>
+                <p className="text-slate-400">{t('admin.manageAllUsers')}</p>
               </div>
-              <button 
-                onClick={() => setShowAddUserModal(true)}
-                className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Add New User</span>
-              </button>
+              <div className="flex items-center space-x-4">
+                {/* Language Switcher */}
+                <LanguageSwitcher />
+                
+                <button 
+                  onClick={() => setShowAddUserModal(true)}
+                  className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>{t('admin.addNewUser')}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -287,7 +295,7 @@ function AllUsersContent() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search users by name or email..."
+                placeholder={t('admin.searchUsers')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none"
@@ -423,7 +431,7 @@ function AllUsersContent() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Add New User</h2>
+                <h2 className="text-2xl font-bold text-white">{t('admin.addNewUser')}</h2>
                 <button
                   onClick={() => setShowAddUserModal(false)}
                   className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
@@ -442,7 +450,7 @@ function AllUsersContent() {
                     value={newUser.firstName}
                     onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none transition-all duration-200"
-                    placeholder="Enter first name"
+                    placeholder={t('admin.enterFirstName')}
                     required
                   />
                 </div>
@@ -456,7 +464,7 @@ function AllUsersContent() {
                     value={newUser.lastName}
                     onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none transition-all duration-200"
-                    placeholder="Enter last name"
+                    placeholder={t('admin.enterLastName')}
                     required
                   />
                 </div>
@@ -470,7 +478,7 @@ function AllUsersContent() {
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none transition-all duration-200"
-                    placeholder="Enter email address"
+                    placeholder={t('admin.enterEmail')}
                     required
                   />
                 </div>
@@ -609,7 +617,7 @@ function AllUsersContent() {
                     value={newUser.password}
                     onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none transition-all duration-200"
-                    placeholder="Enter password"
+                    placeholder={t('admin.enterPassword')}
                     required
                   />
                 </div>
@@ -623,7 +631,7 @@ function AllUsersContent() {
                     value={newUser.confirmPassword}
                     onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none transition-all duration-200"
-                    placeholder="Confirm password"
+                    placeholder={t('admin.confirmPassword')}
                     required
                   />
                 </div>

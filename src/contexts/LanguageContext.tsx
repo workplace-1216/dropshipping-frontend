@@ -208,7 +208,6 @@ const translations = {
         'home.multiTenantInventory': 'Multi-tenant inventory management',
         'home.realTimeOrderTracking': 'Real-time order tracking',
         'home.automatedAlertsReporting': 'Automated alerts & reporting',
-        'home.securePaymentProcessing': 'Secure payment processing',
         'home.forBuyers': 'For Buyers',
         'home.buyersDescription': 'Discover and purchase products from verified sellers',
         'home.wideProductSelection': 'Wide product selection',
@@ -379,6 +378,78 @@ const translations = {
         'home.retryOnFailure': 'Retry on failure',
         'home.webhookIntegration': 'Webhook integration',
         'home.autoUpgradeOptions': 'Auto-upgrade options',
+        
+        // Admin Dashboard
+        'admin.welcomeBack': 'Welcome Back',
+        'admin.dashboard': 'Admin Dashboard',
+        'admin.loadingDashboard': 'Loading Admin Dashboard...',
+        'admin.userManagement': 'User Management',
+        'admin.allUsers': 'All Users',
+        'admin.addNewUser': 'Add New User',
+        'admin.searchUsers': 'Search users by name or email...',
+        'admin.loadingUsers': 'Loading Users...',
+        'admin.backToAdmin': 'Back to Admin Dashboard',
+        'admin.enterFirstName': 'Enter first name',
+        'admin.enterLastName': 'Enter last name',
+        'admin.enterEmail': 'Enter email address',
+        'admin.enterPassword': 'Enter password',
+        'admin.confirmPassword': 'Confirm password',
+        'admin.permissions': 'Permissions',
+        'admin.loadingPermissions': 'Loading Permissions...',
+        'admin.searchPermissions': 'Search permissions...',
+        'admin.allCategories': 'All Categories',
+        'admin.searchModules': 'Search modules, suppliers, orders...',
+        'admin.searchSuppliers': 'Search suppliers...',
+        'admin.searchProducts': 'Search products...',
+        
+        // Admin Sidebar and Navigation
+        'admin.controlPanel': 'Admin Control Panel',
+        'admin.platformManagement': 'Platform Management',
+        'admin.overview': 'Overview',
+        'admin.multiTenantSuppliers': 'Multi-Tenant Suppliers',
+        'admin.supplierManagement': 'Supplier Management',
+        'admin.productManagement': 'Product Management',
+        'admin.orderManagement': 'Order Management',
+        'admin.financialManagement': 'Financial Management',
+        'admin.analytics': 'Analytics',
+        'admin.settings': 'Settings',
+        'admin.notifications': 'Notifications',
+        'admin.recentActivity': 'Recent Activity',
+        'admin.quickActions': 'Quick Actions',
+        'admin.systemSettings': 'System Settings',
+        
+        // User Roles
+        'admin.admins': 'Admins',
+        'admin.operators': 'Operators',
+        'admin.suppliers': 'Suppliers',
+        'admin.sellers': 'Sellers',
+        
+        // Admin Descriptions
+        'admin.manageAllUsers': 'Manage all platform users and their permissions',
+        'admin.configureRoleBasedAccess': 'Configure role-based access control permissions',
+        'admin.saveChanges': 'Save Changes',
+        
+        // Admin Stats and Data
+        'admin.totalSuppliers': 'Total Suppliers',
+        'admin.activeSuppliers': 'Active Suppliers',
+        'admin.newSupplierOnboarded': 'New supplier "TechSupply Pro" onboarded successfully',
+        'admin.batchOrdersProcessed': 'Batch of 47 orders processed automatically',
+        'admin.commissionPayoutCompleted': '$12,450 commission payout completed',
+        'admin.lowInventoryAlert': 'Low inventory alert for 5 products',
+        'admin.apiSyncCompleted': 'Mercado Livre API sync completed',
+        'admin.minAgo': 'min ago',
+        
+        // Admin Categories
+        'admin.financial': 'Financial',
+        'admin.reportsAnalytics': 'Reports & Analytics',
+        'admin.allSuppliers': 'All Suppliers',
+        
+        // Admin Actions
+        'admin.viewAnalytics': 'View Analytics',
+        'admin.viewFinancialData': 'View Financial Data',
+        'admin.viewSettings': 'View Settings',
+        'admin.editSettings': 'Edit Settings',
+        'admin.configureSettings': 'Configure Settings',
         // Key Benefits
         'home.connectWithMultipleMarketplacesSellEverywhere': 'Connect with multiple marketplaces and sell everywhere',
         'home.focusOnGrowingBusinessHandleLogistics': 'Focus on growing your business while we handle logistics',
@@ -604,7 +675,6 @@ const translations = {
         'home.multiTenantInventory': 'Gerenciamento de estoque multi-inquilino',
         'home.realTimeOrderTracking': 'Rastreamento de pedidos em tempo real',
         'home.automatedAlertsReporting': 'Alertas e relatórios automatizados',
-        'home.securePaymentProcessing': 'Processamento de pagamento seguro',
         'home.forBuyers': 'Para Compradores',
         'home.buyersDescription': 'Descubra e compre produtos de vendedores verificados',
         'home.wideProductSelection': 'Ampla seleção de produtos',
@@ -775,6 +845,78 @@ const translations = {
         'home.retryOnFailure': 'Tentar novamente em caso de falha',
         'home.webhookIntegration': 'Integração de webhook',
         'home.autoUpgradeOptions': 'Opções de atualização automática',
+        
+        // Admin Dashboard
+        'admin.welcomeBack': 'Bem-vindo de Volta',
+        'admin.dashboard': 'Painel Administrativo',
+        'admin.loadingDashboard': 'Carregando Painel Administrativo...',
+        'admin.userManagement': 'Gerenciamento de Usuários',
+        'admin.allUsers': 'Todos os Usuários',
+        'admin.addNewUser': 'Adicionar Novo Usuário',
+        'admin.searchUsers': 'Buscar usuários por nome ou email...',
+        'admin.loadingUsers': 'Carregando Usuários...',
+        'admin.backToAdmin': 'Voltar ao Painel Administrativo',
+        'admin.enterFirstName': 'Digite o primeiro nome',
+        'admin.enterLastName': 'Digite o sobrenome',
+        'admin.enterEmail': 'Digite o endereço de email',
+        'admin.enterPassword': 'Digite a senha',
+        'admin.confirmPassword': 'Confirme a senha',
+        'admin.permissions': 'Permissões',
+        'admin.loadingPermissions': 'Carregando Permissões...',
+        'admin.searchPermissions': 'Buscar permissões...',
+        'admin.allCategories': 'Todas as Categorias',
+        'admin.searchModules': 'Buscar módulos, fornecedores, pedidos...',
+        'admin.searchSuppliers': 'Buscar fornecedores...',
+        'admin.searchProducts': 'Buscar produtos...',
+        
+        // Admin Sidebar and Navigation
+        'admin.controlPanel': 'Painel de Controle Administrativo',
+        'admin.platformManagement': 'Gerenciamento da Plataforma',
+        'admin.overview': 'Visão Geral',
+        'admin.multiTenantSuppliers': 'Fornecedores Multi-Inquilino',
+        'admin.supplierManagement': 'Gerenciamento de Fornecedores',
+        'admin.productManagement': 'Gerenciamento de Produtos',
+        'admin.orderManagement': 'Gerenciamento de Pedidos',
+        'admin.financialManagement': 'Gerenciamento Financeiro',
+        'admin.analytics': 'Análises',
+        'admin.settings': 'Configurações',
+        'admin.notifications': 'Notificações',
+        'admin.recentActivity': 'Atividade Recente',
+        'admin.quickActions': 'Ações Rápidas',
+        'admin.systemSettings': 'Configurações do Sistema',
+        
+        // User Roles
+        'admin.admins': 'Administradores',
+        'admin.operators': 'Operadores',
+        'admin.suppliers': 'Fornecedores',
+        'admin.sellers': 'Vendedores',
+        
+        // Admin Descriptions
+        'admin.manageAllUsers': 'Gerenciar todos os usuários da plataforma e suas permissões',
+        'admin.configureRoleBasedAccess': 'Configurar permissões de controle de acesso baseado em funções',
+        'admin.saveChanges': 'Salvar Alterações',
+        
+        // Admin Stats and Data
+        'admin.totalSuppliers': 'Total de Fornecedores',
+        'admin.activeSuppliers': 'Fornecedores Ativos',
+        'admin.newSupplierOnboarded': 'Novo fornecedor "TechSupply Pro" integrado com sucesso',
+        'admin.batchOrdersProcessed': 'Lote de 47 pedidos processado automaticamente',
+        'admin.commissionPayoutCompleted': 'Pagamento de comissão de $12.450 concluído',
+        'admin.lowInventoryAlert': 'Alerta de estoque baixo para 5 produtos',
+        'admin.apiSyncCompleted': 'Sincronização da API Mercado Livre concluída',
+        'admin.minAgo': 'min atrás',
+        
+        // Admin Categories
+        'admin.financial': 'Financeiro',
+        'admin.reportsAnalytics': 'Relatórios e Análises',
+        'admin.allSuppliers': 'Todos os Fornecedores',
+        
+        // Admin Actions
+        'admin.viewAnalytics': 'Ver Análises',
+        'admin.viewFinancialData': 'Ver Dados Financeiros',
+        'admin.viewSettings': 'Ver Configurações',
+        'admin.editSettings': 'Editar Configurações',
+        'admin.configureSettings': 'Configurar Configurações',
         // Key Benefits
         'home.connectWithMultipleMarketplacesSellEverywhere': 'Conecte-se com múltiplos marketplaces e venda em todos os lugares',
         'home.focusOnGrowingBusinessHandleLogistics': 'Concentre-se em expandir seu negócio enquanto cuidamos da logística',
