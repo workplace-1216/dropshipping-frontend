@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -28,10 +28,6 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
-  Eye,
-  Edit,
-  Trash2,
-  Plus
 } from 'lucide-react';
 
 export default function PermissionsManagement() {

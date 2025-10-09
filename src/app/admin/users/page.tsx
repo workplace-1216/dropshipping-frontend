@@ -5,7 +5,18 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -15,26 +26,19 @@ import {
   ArrowLeft,
   Search,
   Filter,
-  Plus,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Calendar,
   Shield,
   MoreHorizontal,
-  CheckCircle,
-  XCircle,
-  Clock,
-  User,
   Users,
   Building2,
   ShoppingBag,
   Settings,
-  X
+  X,
+  Edit,
+  Trash2,
+  Plus
 } from 'lucide-react';
 
-export default function AllUsersPage() {
+function AllUsersContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -52,6 +56,11 @@ export default function AllUsersPage() {
     password: '',
     confirmPassword: ''
   });
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [usersByRole, setUsersByRole] = useState<Record<string, number>>({});
+
+  const totalUsers = Object.values(usersByRole).reduce((sum: number, count: number) => sum + (count || 0), 0);
 
   // Redirect if not admin
   React.useEffect(() => {
@@ -119,12 +128,6 @@ export default function AllUsersPage() {
   if (!isAuthenticated || user?.email !== 'admin@admin.com') {
     return null;
   }
-
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [usersByRole, setUsersByRole] = useState<any>({});
-
-  const totalUsers = Object.values(usersByRole).reduce((sum: number, count: any) => sum + (count || 0), 0);
   
   const roles = [
     { id: 'all', name: 'All Users', icon: Users, color: 'from-gray-500 to-gray-600', count: totalUsers },
@@ -646,5 +649,13 @@ export default function AllUsersPage() {
         )}
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function AllUsersPage() {
+  return (
+    <Suspense fallback={<PageLoader isLoading={true} message="Loading Users..." />}>
+      <AllUsersContent />
+    </Suspense>
   );
 }

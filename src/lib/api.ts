@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { getLogoutRedirectUrl } from './redirect';
 
 // API Response types
 export interface ApiResponse<T = unknown> {

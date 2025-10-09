@@ -13,32 +13,11 @@ import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { motion } from 'framer-motion';
 import {
   Package,
-  TrendingUp,
-  Users,
-  Shield,
-  Zap,
-  ArrowRight,
   CheckCircle,
-  ShoppingCart,
-  BarChart3,
   Rocket,
   Clock,
   DollarSign,
-  Box,
-  Truck,
-  Search,
-  Target,
   Sparkles,
-  Globe,
-  RefreshCw,
-  FileText,
-  Wallet,
-  Palette,
-  Link as LinkIcon,
-  Layers,
-  Settings,
-  CreditCard,
-  TrendingDown,
   ShoppingBag
 } from 'lucide-react';
 
@@ -56,7 +35,7 @@ export default function Home() {
     { name: t('home.tikTokShop'), color: 'from-black to-cyan-500', description: t('home.socialCommerceMadeEasy') },
     { name: t('home.kwaiShop'), color: 'from-orange-600 to-pink-600', description: t('home.quickProductPublishingSalesTracking') },
     { name: t('home.magalu'), color: 'from-blue-500 to-blue-700', description: t('home.brazilianMarketLeaderIntegration') }
-  ], [currentLanguage, t]);
+  ], [t]);
 
   // Section 3: Order Flow Steps
   const orderFlowSteps = React.useMemo(() => [
@@ -65,7 +44,41 @@ export default function Home() {
     { svg: '/svg/stock-management.svg', label: t('home.stockManagement'), color: 'from-purple-500 to-pink-600' },
     { svg: '/svg/instant-invoicing.svg', label: t('home.instantInvoicing'), color: 'from-orange-500 to-red-600' },
     { svg: '/svg/fast-shipment.svg', label: t('home.fastShipment'), color: 'from-indigo-500 to-blue-600' }
-  ], [currentLanguage, t]);
+  ], [t]);
+
+  // Section 6: Key Benefits
+  const keyBenefits = React.useMemo(() => [
+    {
+      svg: '/svg/multi-channel.svg',
+      title: t('home.multiChannelIntegration'),
+      description: t('home.connectWithMultipleMarketplacesSellEverywhere'),
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      svg: '/svg/automated-fulfillment.svg',
+      title: t('home.automatedOrderFulfillment'),
+      description: t('home.focusOnGrowingBusinessHandleLogistics'),
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      svg: '/svg/whitelabel.svg',
+      title: t('home.whitelabelSolution'),
+      description: t('home.runYourOwnBrandedPlatformScalability'),
+      color: 'from-purple-500 to-pink-500'
+    },
+    {
+      svg: '/svg/digital-wallet.svg',
+      title: t('home.digitalWallet'),
+      description: t('home.seamlessFinancialTransactionsIntegratedGateways'),
+      color: 'from-orange-500 to-red-500'
+    },
+    {
+      svg: '/svg/realtime-sync.svg',
+      title: t('home.realTimeDataSyncing'),
+      description: t('home.alwaysUpToDateAcrossAllPlatforms'),
+      color: 'from-indigo-500 to-blue-500'
+    }
+  ], [t]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -90,40 +103,6 @@ export default function Home() {
     );
   }
 
-  // Section 6: Key Benefits
-  const keyBenefits = [
-    {
-      svg: '/svg/multi-channel.svg',
-      title: 'Multi-Channel Integration',
-      description: t('home.connectWithMultipleMarketplacesSellEverywhere'),
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      svg: '/svg/automated-fulfillment.svg',
-      title: 'Automated Order Fulfillment',
-      description: t('home.focusOnGrowingBusinessHandleLogistics'),
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      svg: '/svg/whitelabel.svg',
-      title: 'Whitelabel Solution',
-      description: t('home.runYourOwnBrandedPlatformScalability'),
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      svg: '/svg/digital-wallet.svg',
-      title: 'Digital Wallet',
-      description: t('home.seamlessFinancialTransactionsIntegratedGateways'),
-      color: 'from-orange-500 to-red-500'
-    },
-    {
-      svg: '/svg/realtime-sync.svg',
-      title: 'Real-Time Data Syncing',
-      description: t('home.alwaysUpToDateAcrossAllPlatforms'),
-      color: 'from-indigo-500 to-blue-500'
-    }
-  ];
-
   return (
     <div key={currentLanguage} className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950">
       {/* Fixed Header */}
@@ -146,7 +125,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  Dropship Hub
+                  {t('home.dropshipHub')}
                 </h1>
                 <p className="text-xs text-gray-400">{t('home.completeDropshippingSolution')}</p>
               </div>
@@ -839,7 +818,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center space-x-2 bg-green-500/20 rounded-full px-4 py-2 mb-6">
                 <img src="/svg/wallet-icon.svg" alt="Wallet" className="w-5 h-5" />
-                <span className="text-sm font-semibold text-green-400">Digital Wallet</span>
+                <span className="text-sm font-semibold text-green-400">{t('home.digitalWallet')}</span>
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -898,7 +877,7 @@ export default function Home() {
                         </div>
                         <div>
                           <p className="font-semibold text-white">{t('home.paymentReceived')}</p>
-                          <p className="text-sm text-gray-400">Mercado Pago • {t('home.today')}</p>
+                          <p className="text-sm text-gray-400">{t('home.mercadoPago')} • {t('home.today')}</p>
                         </div>
                       </div>
                       <p className="font-bold text-green-400 text-lg">+$850.00</p>
@@ -995,10 +974,10 @@ export default function Home() {
                 <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700">
                   <h4 className="text-sm font-semibold text-gray-400 mb-4">{t('home.supportedPaymentMethods')}</h4>
                   <div className="flex flex-wrap gap-3">
-                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">Mercado Pago</div>
-                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">PIX</div>
-                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">Credit Card</div>
-                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">Boleto</div>
+                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">{t('home.mercadoPago')}</div>
+                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">{t('home.pix')}</div>
+                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">{t('home.creditCard')}</div>
+                    <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">{t('home.boleto')}</div>
                     <div className="bg-gray-700 rounded-lg px-4 py-2 text-sm text-white">{t('home.bankTransfer')}</div>
                   </div>
                 </div>
@@ -1025,7 +1004,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center space-x-2 bg-purple-500/20 rounded-full px-4 py-2 mb-6">
                 <img src="/svg/palette-icon.svg" alt="Palette" className="w-5 h-5" />
-                <span className="text-sm font-semibold text-purple-400">Whitelabel Solution</span>
+                <span className="text-sm font-semibold text-purple-400">{t('home.whitelabelSolution')}</span>
               </div>
 
               <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -1552,7 +1531,7 @@ export default function Home() {
                 >
                   <div className='flex items-center'>
                     <Rocket className="w-6 h-6 mr-2 text-blue-200" />
-                    <span className="text-white font-semibold">Sign Up Now - It&apos;s Free!</span>
+                    <span className="text-white font-semibold">{t('home.signUpNowItsFree')}</span>
                   </div>
                 </GradientButton>
                 <Button
@@ -1706,7 +1685,7 @@ export default function Home() {
             {/* Bottom Content */}
             <div className="text-center">
               <p className="text-gray-400 text-xs">
-                © 2025 Dropship Hub. All rights reserved. | Privacy Policy | Terms of Service
+                © 2025 {t('home.dropshipHub')}. {t('home.allRightsReserved')} | {t('home.privacyPolicy')} | {t('home.termsOfService')}
               </p>
             </div>
           </div>

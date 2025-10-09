@@ -377,7 +377,7 @@ function AdminDashboard() {
                             Welcome Back, {user?.firstName}! 👋
                           </h1>
                           <p className="text-xl text-blue-100 mb-6">
-                            Here's everything happening across your dropshipping empire
+                            Here&apos;s everything happening across your dropshipping empire
                           </p>
                           <div className="flex items-center space-x-4">
                             <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">

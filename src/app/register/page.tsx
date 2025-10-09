@@ -11,10 +11,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
 import { getAuthRedirectUrl } from '@/lib/redirect';
 import { googleAuth } from '@/lib/google-auth';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { GradientButton } from '@/components/ui/GradientButton';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { motion } from 'framer-motion';
 import {
@@ -43,7 +39,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: registerUser, isLoading, user } = useAuth();
+  const { register: registerUser, user } = useAuth();
   const { t } = useLanguage();
   const toast = useToastHelpers();
   const [error, setError] = useState<string>('');

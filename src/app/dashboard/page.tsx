@@ -1,20 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { GradientButton } from '@/components/ui/GradientButton';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { 
   ShoppingCart, 
-  Package, 
-  Users, 
+  Package,
+  Users,
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
@@ -28,41 +26,6 @@ export default function Dashboard() {
   const { t, currentLanguage } = useLanguage();
   const router = useRouter();
   const [pageLoading, setPageLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    } else if (isAuthenticated) {
-      // Simulate data loading
-      setTimeout(() => {
-        setPageLoading(false);
-      }, 500);
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  if (isLoading || pageLoading) {
-    return <PageLoader isLoading={true} message="Loading Dashboard..." />;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-medium">{t('common.loading')}</p>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   // Mock data for demonstration - will update when language changes
   const kpiData = React.useMemo(() => [
@@ -117,7 +80,26 @@ export default function Dashboard() {
     { type: 'warning', message: t('dashboard.lowStockAlert'), time: t('dashboard.time5minAgo') },
     { type: 'success', message: t('dashboard.paymentProcessed'), time: t('dashboard.time1hourAgo') },
     { type: 'info', message: t('dashboard.newCustomerRegistration'), time: t('dashboard.time2hoursAgo') }
-  ], [currentLanguage, t]);
+  ], [t]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    } else if (isAuthenticated) {
+      // Simulate data loading
+      setTimeout(() => {
+        setPageLoading(false);
+      }, 500);
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || pageLoading) {
+    return <PageLoader isLoading={true} message="Loading Dashboard..." />;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <DashboardLayout key={currentLanguage}>

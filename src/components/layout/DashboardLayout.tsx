@@ -8,11 +8,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { 
   Menu, 
-  X, 
   Home, 
   ShoppingBag, 
   Package, 
@@ -32,7 +30,6 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
   const router = useRouter();
 
   const isAdmin = user?.email === 'admin@admin.com';

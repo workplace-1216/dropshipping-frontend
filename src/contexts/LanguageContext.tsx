@@ -403,7 +403,19 @@ const translations = {
         // CTA Section
         'home.noCreditCardRequired': 'No credit card required',
         'home.freeForeverPlan': 'Free forever plan',
-        'home.setupIn5Minutes': 'Setup in 5 minutes'
+        'home.setupIn5Minutes': 'Setup in 5 minutes',
+        // Additional missing translations
+        'home.multiChannelIntegration': 'Multi-Channel Integration',
+        'home.automatedOrderFulfillment': 'Automated Order Fulfillment',
+        'home.whitelabelSolution': 'Whitelabel Solution',
+        'home.digitalWallet': 'Digital Wallet',
+        'home.realTimeDataSyncing': 'Real-Time Data Syncing',
+        'home.mercadoPago': 'Mercado Pago',
+        'home.creditCard': 'Credit Card',
+        'home.allRightsReserved': 'All rights reserved',
+        'home.privacyPolicy': 'Privacy Policy',
+        'home.termsOfService': 'Terms of Service',
+        'home.signUpNowItsFree': 'Sign Up Now - It\'s Free!'
   },
   pt: {
     // Navigation
@@ -782,7 +794,19 @@ const translations = {
         // CTA Section
         'home.noCreditCardRequired': 'Nenhum cartão de crédito necessário',
         'home.freeForeverPlan': 'Plano gratuito para sempre',
-        'home.setupIn5Minutes': 'Configuração em 5 minutos'
+        'home.setupIn5Minutes': 'Configuração em 5 minutos',
+        // Additional missing translations
+        'home.multiChannelIntegration': 'Integração Multi-Canal',
+        'home.automatedOrderFulfillment': 'Atendimento Automatizado de Pedidos',
+        'home.whitelabelSolution': 'Solução White Label',
+        'home.digitalWallet': 'Carteira Digital',
+        'home.realTimeDataSyncing': 'Sincronização de Dados em Tempo Real',
+        'home.mercadoPago': 'Mercado Pago',
+        'home.creditCard': 'Cartão de Crédito',
+        'home.allRightsReserved': 'Todos os direitos reservados',
+        'home.privacyPolicy': 'Política de Privacidade',
+        'home.termsOfService': 'Termos de Serviço',
+        'home.signUpNowItsFree': 'Cadastre-se Agora - É Grátis!'
   }
 };
 

@@ -10,12 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
 import { getAuthRedirectUrl } from '@/lib/redirect';
-import { User } from '@/lib/api';
 import { googleAuth } from '@/lib/google-auth';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { GradientButton } from '@/components/ui/GradientButton';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
@@ -29,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, user } = useAuth();
+  const { login } = useAuth();
   const { t, currentLanguage } = useLanguage();
   const toast = useToastHelpers();
   const [error, setError] = useState<string>('');
