@@ -450,6 +450,19 @@ const translations = {
         'admin.viewSettings': 'View Settings',
         'admin.editSettings': 'Edit Settings',
         'admin.configureSettings': 'Configure Settings',
+        
+        // Admin Sidebar Menu Items
+        'admin.rbacManagement': 'RBAC Management',
+        'admin.pickingPacking': 'Picking & Packing',
+        'admin.marketplaceIntegration': 'Marketplace Integration',
+        'admin.catalogManagement': 'Catalog Management',
+        'admin.orderAutomation': 'Order Automation',
+        'admin.taxIntegration': 'Tax Integration',
+        'admin.logisticsTracking': 'Logistics & Tracking',
+        'admin.digitalWallet': 'Digital Wallet',
+        'admin.subscriptionBilling': 'Subscription & Billing',
+        'admin.whitelabelManagement': 'Whitelabel Management',
+        'admin.securityAudit': 'Security & Audit',
         // Key Benefits
         'home.connectWithMultipleMarketplacesSellEverywhere': 'Connect with multiple marketplaces and sell everywhere',
         'home.focusOnGrowingBusinessHandleLogistics': 'Focus on growing your business while we handle logistics',
@@ -917,6 +930,19 @@ const translations = {
         'admin.viewSettings': 'Ver Configurações',
         'admin.editSettings': 'Editar Configurações',
         'admin.configureSettings': 'Configurar Configurações',
+        
+        // Admin Sidebar Menu Items
+        'admin.rbacManagement': 'Gerenciamento RBAC',
+        'admin.pickingPacking': 'Separação e Embalagem',
+        'admin.marketplaceIntegration': 'Integração de Marketplace',
+        'admin.catalogManagement': 'Gerenciamento de Catálogo',
+        'admin.orderAutomation': 'Automação de Pedidos',
+        'admin.taxIntegration': 'Integração Fiscal',
+        'admin.logisticsTracking': 'Logística e Rastreamento',
+        'admin.digitalWallet': 'Carteira Digital',
+        'admin.subscriptionBilling': 'Assinatura e Cobrança',
+        'admin.whitelabelManagement': 'Gerenciamento Whitelabel',
+        'admin.securityAudit': 'Segurança e Auditoria',
         // Key Benefits
         'home.connectWithMultipleMarketplacesSellEverywhere': 'Conecte-se com múltiplos marketplaces e venda em todos os lugares',
         'home.focusOnGrowingBusinessHandleLogistics': 'Concentre-se em expandir seu negócio enquanto cuidamos da logística',

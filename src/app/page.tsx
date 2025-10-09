@@ -1336,7 +1336,7 @@ export default function Home() {
               >
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-white mb-2">{t('home.enterprise')}</h3>
-                  <div className="text-4xl font-bold text-yellow-400 mb-2">Custom</div>
+                  <div className="text-4xl font-bold text-yellow-400 mb-2">{t('home.custom')}</div>
                   <p className="text-gray-400 text-sm">{t('home.contactUs')}</p>
                 </div>
                 <ul className="space-y-3 mb-8 flex-grow">

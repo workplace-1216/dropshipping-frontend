@@ -17,12 +17,27 @@ interface User {
   createdAt: string;
   updatedAt: string;
 }
+
+interface UsersResponse {
+  users: User[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+interface UsersByRoleResponse {
+  [key: string]: number;
+}
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { apiClient } from '@/lib/api';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -92,30 +107,14 @@ function AllUsersContent() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
         
-        const [usersResponse, rolesResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/users?role=${roleFilter}&search=${searchQuery}&status=${statusFilter}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/by-role`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }),
+        const [usersData, rolesData] = await Promise.all([
+          apiClient.get<UsersResponse>(`/users?role=${roleFilter}&search=${searchQuery}&status=${statusFilter}`),
+          apiClient.get<UsersByRoleResponse>('/users/by-role')
         ]);
-
-        if (usersResponse.ok && rolesResponse.ok) {
-          const usersData = await usersResponse.json();
-          const rolesData = await rolesResponse.json();
-          
-          setUsers(usersData.users || []);
-          setUsersByRole(rolesData || {});
-        }
+        
+        setUsers(usersData.users || []);
+        setUsersByRole(rolesData || {});
       } catch (error) {
         console.error('Error fetching users:', error);
       } finally {
@@ -170,58 +169,36 @@ function AllUsersContent() {
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      if (newUser.password !== newUser.confirmPassword) {
-        alert('Passwords do not match');
-        return;
-      }
+    if (newUser.password !== newUser.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
 
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          email: newUser.email,
-          password: newUser.password,
-          role: newUser.role,
-        }),
+    try {
+      await apiClient.post('/users', {
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role,
       });
 
-      if (response.ok) {
-        // Refresh users list
-        const usersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setUsers(usersData.users || []);
-        }
+      // Refresh users list
+      const usersData = await apiClient.get<UsersResponse>('/users');
+      setUsers(usersData.users || []);
 
-        setShowAddUserModal(false);
-        setNewUser({
-          firstName: '',
-          lastName: '',
-          email: '',
-          role: '',
-          password: '',
-          confirmPassword: ''
-        });
-      } else {
-        const error = await response.json();
-        alert(error.message || 'Failed to create user');
-      }
+      setShowAddUserModal(false);
+      setNewUser({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: '',
+        password: '',
+        confirmPassword: ''
+      });
     } catch (error) {
       console.error('Error creating user:', error);
-      alert('Failed to create user');
+      alert('Failed to create user. Please try again.');
     }
   };
 

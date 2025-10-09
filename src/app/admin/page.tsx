@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { apiClient } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, 
@@ -62,6 +63,35 @@ function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeModule, setActiveModule] = useState('overview');
   const [pageLoading, setPageLoading] = useState(true);
+  
+  // Type definitions for API responses
+  interface UsersByRoleResponse {
+    [key: string]: number;
+  }
+
+  interface RecentUser {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+  }
+
+  interface PermissionMatrixItem {
+    id: string;
+    name: string;
+    roles?: {
+      [key: string]: boolean;
+    };
+  }
+
+  // RBAC Data State
+  const [usersByRole, setUsersByRole] = useState<Record<string, number>>({});
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [permissionMatrix, setPermissionMatrix] = useState<PermissionMatrixItem[]>([]);
+  const [rbacLoading, setRbacLoading] = useState(false);
+  const [rbacError, setRbacError] = useState<string | null>(null);
 
   // Persist active module to localStorage
   React.useEffect(() => {
@@ -110,21 +140,48 @@ function AdminDashboard() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-white font-medium">Loading Admin Panel...</p>
-        </motion.div>
-      </div>
-    );
-  }
+  // RBAC Data Fetching Functions
+  const fetchUsersByRole = useCallback(async () => {
+    try {
+      setRbacLoading(true);
+      setRbacError(null);
+      const data = await apiClient.get<UsersByRoleResponse>('/users/by-role');
+      setUsersByRole(data);
+    } catch (error) {
+      console.error('Error fetching users by role:', error);
+      setRbacError('Failed to load user role data');
+    } finally {
+      setRbacLoading(false);
+    }
+  }, []);
+
+  const fetchRecentUsers = useCallback(async () => {
+    try {
+      const data = await apiClient.get<RecentUser[]>('/users/recent?limit=8');
+      setRecentUsers(data);
+    } catch (error) {
+      console.error('Error fetching recent users:', error);
+    }
+  }, []);
+
+  const fetchPermissionMatrix = useCallback(async () => {
+    try {
+      const data = await apiClient.get<PermissionMatrixItem[]>('/permissions/matrix');
+      setPermissionMatrix(data);
+    } catch (error) {
+      console.error('Error fetching permission matrix:', error);
+    }
+  }, []);
+
+  // Load RBAC data when RBAC module is active
+  useEffect(() => {
+    if (activeModule === 'rbac' && isAuthenticated) {
+      fetchUsersByRole();
+      fetchRecentUsers();
+      fetchPermissionMatrix();
+    }
+  }, [activeModule, isAuthenticated, fetchUsersByRole, fetchRecentUsers, fetchPermissionMatrix]);
+
 
   if (!isAuthenticated) {
     return null;
@@ -134,17 +191,17 @@ function AdminDashboard() {
   const modules = [
     { id: 'overview', name: t('admin.overview'), icon: BarChart3, color: 'blue' },
     { id: 'suppliers', name: t('admin.multiTenantSuppliers'), icon: Building2, color: 'green' },
-    { id: 'rbac', name: 'RBAC Management', icon: Shield, color: 'purple' },
-    { id: 'picking', name: 'Picking & Packing', icon: Package, color: 'orange' },
-    { id: 'marketplaces', name: 'Marketplace Integration', icon: Globe, color: 'cyan' },
-    { id: 'catalog', name: 'Catalog Management', icon: Warehouse, color: 'red' },
-    { id: 'orders', name: 'Order Automation', icon: Zap, color: 'yellow' },
-    { id: 'tax', name: 'Tax Integration', icon: FileText, color: 'indigo' },
-    { id: 'logistics', name: 'Logistics & Tracking', icon: Truck, color: 'pink' },
-    { id: 'wallet', name: 'Digital Wallet', icon: CreditCard, color: 'emerald' },
-    { id: 'billing', name: 'Subscription & Billing', icon: DollarSign, color: 'teal' },
-    { id: 'whitelabel', name: 'Whitelabel Management', icon: UserCheck, color: 'rose' },
-    { id: 'security', name: 'Security & Audit', icon: Shield, color: 'slate' }
+    { id: 'rbac', name: t('admin.rbacManagement'), icon: Shield, color: 'purple' },
+    { id: 'picking', name: t('admin.pickingPacking'), icon: Package, color: 'orange' },
+    { id: 'marketplaces', name: t('admin.marketplaceIntegration'), icon: Globe, color: 'cyan' },
+    { id: 'catalog', name: t('admin.catalogManagement'), icon: Warehouse, color: 'red' },
+    { id: 'orders', name: t('admin.orderAutomation'), icon: Zap, color: 'yellow' },
+    { id: 'tax', name: t('admin.taxIntegration'), icon: FileText, color: 'indigo' },
+    { id: 'logistics', name: t('admin.logisticsTracking'), icon: Truck, color: 'pink' },
+    { id: 'wallet', name: t('admin.digitalWallet'), icon: CreditCard, color: 'emerald' },
+    { id: 'billing', name: t('admin.subscriptionBilling'), icon: DollarSign, color: 'teal' },
+    { id: 'whitelabel', name: t('admin.whitelabelManagement'), icon: UserCheck, color: 'rose' },
+    { id: 'security', name: t('admin.securityAudit'), icon: Shield, color: 'slate' }
   ];
 
   // Overview KPI data
@@ -193,7 +250,7 @@ function AdminDashboard() {
 
   return (
     <>
-      <PageLoader isLoading={pageLoading || isLoading} message={t('admin.loadingDashboard')} />
+      <PageLoader isLoading={isLoading || pageLoading} message={t('admin.loadingDashboard')} />
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Header - Fixed */}
@@ -765,12 +822,44 @@ function AdminDashboard() {
 
                       {/* Role Cards */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                          { name: 'Admin', count: 3, color: 'from-red-500 to-pink-600', icon: '👑', description: 'Full platform access', permissions: 'All permissions' },
-                          { name: 'Operator', count: 12, color: 'from-blue-500 to-cyan-600', icon: '⚙️', description: 'Operational management', permissions: 'Order & Inventory' },
-                          { name: 'Supplier', count: 156, color: 'from-emerald-500 to-green-600', icon: '🏪', description: 'Supplier operations', permissions: 'Product & Sales' },
-                          { name: 'Seller', count: 2847, color: 'from-purple-500 to-indigo-600', icon: '💼', description: 'Sales and orders', permissions: 'Orders only' }
-                        ].map((role, index) => (
+                        {rbacLoading ? (
+                          // Loading skeleton
+                          Array.from({ length: 4 }).map((_, index) => (
+                            <div key={index} className="rounded-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 animate-pulse">
+                              <div className="flex items-center justify-between mb-4">
+                                <div className="w-16 h-16 bg-slate-700 rounded-2xl"></div>
+                                <div className="text-right">
+                                  <div className="w-12 h-8 bg-slate-700 rounded"></div>
+                                  <div className="w-8 h-4 bg-slate-700 rounded mt-1"></div>
+                                </div>
+                              </div>
+                              <div className="w-20 h-6 bg-slate-700 rounded mb-2"></div>
+                              <div className="w-full h-4 bg-slate-700 rounded mb-3"></div>
+                              <div className="w-full h-4 bg-slate-700 rounded mb-4"></div>
+                              <div className="w-full h-10 bg-slate-700 rounded"></div>
+                            </div>
+                          ))
+                        ) : rbacError ? (
+                          // Error state
+                          <div className="col-span-full text-center py-8">
+                            <div className="text-red-400 mb-2">⚠️ {rbacError}</div>
+                            <button 
+                              onClick={fetchUsersByRole}
+                              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        ) : (
+                          // Dynamic role data
+                          [
+                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: '👑', description: 'Full platform access', permissions: 'All permissions' },
+                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: '⚙️', description: 'Operational management', permissions: 'Order & Inventory' },
+                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: '🏪', description: 'Supplier operations', permissions: 'Product & Sales' },
+                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: '💼', description: 'Sales and orders', permissions: 'Orders only' }
+                          ].map((role, index) => {
+                            const count = usersByRole[role.name.toUpperCase()] || 0;
+                            return (
                           <motion.div
                             key={index}
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -785,7 +874,7 @@ function AdminDashboard() {
                                   <span className="text-3xl">{role.icon}</span>
                                 </div>
                                 <div className="text-right">
-                                  <span className="text-4xl font-bold text-white">{role.count}</span>
+                                  <span className="text-4xl font-bold text-white">{count}</span>
                                   <p className="text-xs text-slate-400 mt-1">users</p>
                                 </div>
                               </div>
@@ -803,155 +892,165 @@ function AdminDashboard() {
                               </button>
                             </div>
                           </motion.div>
-                        ))}
+                            );
+                          })
+                        )}
                       </div>
 
-                      {/* Users by Role */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {[
-                          { 
-                            role: 'Admin', 
-                            color: 'from-purple-500 to-purple-600',
-                            users: [
-                              { name: 'John Smith', email: 'admin@gmail.com', avatar: '👨‍💼', status: 'online' },
-                              { name: 'Sarah Johnson', email: 'sarah@admin.com', avatar: '👩‍💼', status: 'online' },
-                              { name: 'Mike Wilson', email: 'mike@admin.com', avatar: '👨', status: 'offline' }
-                            ]
-                          },
-                          { 
-                            role: 'Operator', 
-                            color: 'from-blue-500 to-blue-600',
-                            users: [
-                              { name: 'Emma Davis', email: 'emma@operator.com', avatar: '👩', status: 'online' },
-                              { name: 'David Lee', email: 'david@operator.com', avatar: '👨', status: 'online' },
-                              { name: 'Lisa Chen', email: 'lisa@operator.com', avatar: '👩', status: 'away' },
-                              { name: 'Tom Brown', email: 'tom@operator.com', avatar: '👨', status: 'offline' },
-                              { name: 'Anna White', email: 'anna@operator.com', avatar: '👩', status: 'online' }
-                            ]
-                          },
-                          { 
-                            role: 'Supplier', 
-                            color: 'from-green-500 to-green-600',
-                            users: [
-                              { name: 'TechSupply Pro', email: 'contact@techsupply.com', avatar: '🏢', status: 'online' },
-                              { name: 'Global Electronics', email: 'sales@global-elec.com', avatar: '🏭', status: 'online' },
-                              { name: 'Fashion Forward', email: 'info@fashionfw.com', avatar: '👔', status: 'away' },
-                              { name: 'AudioMax', email: 'support@audiomax.com', avatar: '🎵', status: 'online' },
-                              { name: 'Home & Garden Co', email: 'sales@homegarden.com', avatar: '🏡', status: 'offline' }
-                            ]
-                          },
-                          { 
-                            role: 'Seller', 
-                            color: 'from-orange-500 to-orange-600',
-                            users: [
-                              { name: 'Carlos Silva', email: 'carlos@seller.com', avatar: '🛍️', status: 'online' },
-                              { name: 'Maria Santos', email: 'maria@seller.com', avatar: '💼', status: 'online' },
-                              { name: 'Pedro Costa', email: 'pedro@seller.com', avatar: '📦', status: 'away' },
-                              { name: 'Ana Oliveira', email: 'ana@seller.com', avatar: '🛒', status: 'online' },
-                              { name: 'João Ferreira', email: 'joao@seller.com', avatar: '💰', status: 'offline' }
-                            ]
-                          }
-                        ].map((roleData) => (
-                          <motion.div
-                            key={roleData.role}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 flex flex-col h-full"
+                      {/* Recent Users */}
+                      <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-xl font-bold text-white">Recent Users</h3>
+                          <button 
+                            onClick={() => router.push('/admin/users')}
+                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                           >
-                            <div className="flex items-center justify-between mb-6">
-                              <h3 className={`text-lg font-bold bg-gradient-to-r ${roleData.color} bg-clip-text text-transparent`}>
-                                {roleData.role}
-                              </h3>
-                              <span className="px-3 py-1 bg-slate-700/50 rounded-lg text-xs text-slate-300">
-                                {roleData.users.length} users
-                              </span>
-                            </div>
-
-                            <div className="flex-1 space-y-3">
-                              {roleData.users.map((user, index) => (
-                                <motion.div
-                                  key={index}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                                  className="flex items-center space-x-3 p-3 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-all duration-200 group cursor-pointer"
-                                >
-                                  <div className="relative">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center text-xl">
-                                      {user.avatar}
-                                    </div>
-                                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800 ${
-                                      user.status === 'online' ? 'bg-green-500' :
-                                      user.status === 'away' ? 'bg-yellow-500' :
-                                      'bg-slate-500'
-                                    }`}></div>
+                            View All Users
+                          </button>
+                        </div>
+                        
+                        {rbacLoading ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {Array.from({ length: 8 }).map((_, index) => (
+                              <div key={index} className="animate-pulse">
+                                <div className="flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
+                                  <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+                                  <div className="flex-1">
+                                    <div className="w-20 h-4 bg-slate-600 rounded mb-1"></div>
+                                    <div className="w-32 h-3 bg-slate-600 rounded"></div>
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate group-hover:text-purple-300 transition-colors">
-                                      {user.name}
-                                    </p>
-                                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : recentUsers.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {recentUsers.map((user, index) => (
+                              <motion.div
+                                key={user.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200 border border-slate-600/30 hover:border-slate-500/50"
+                              >
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                  {user.firstName?.charAt(0) || 'U'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-medium text-sm truncate">
+                                    {user.firstName} {user.lastName}
+                                  </p>
+                                  <p className="text-slate-400 text-xs truncate">{user.email}</p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <span className={`inline-block w-2 h-2 rounded-full ${
+                                      user.isActive ? 'bg-green-400' : 'bg-red-400'
+                                    }`}></span>
+                                    <span className="text-xs text-slate-500 capitalize">{user.role.toLowerCase()}</span>
                                   </div>
-                                </motion.div>
-                              ))}
-                            </div>
-
-                            <button 
-                              onClick={() => router.push(`/admin/users?role=${roleData.role.toLowerCase()}`)}
-                              className="w-full mt-4 py-2.5 text-sm font-medium bg-slate-700/30 hover:bg-slate-700/50 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/30 hover:border-slate-500/50 flex items-center justify-center space-x-2"
-                            >
-                              <Users className="w-4 h-4" />
-                              <span>View All {roleData.role}s</span>
-                            </button>
-                          </motion.div>
-                        ))}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-slate-400">
+                            No recent users found
+                          </div>
+                        )}
                       </div>
 
                       {/* Permission Matrix */}
                       <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                        <h3 className="text-xl font-bold text-white mb-6">Permission Matrix</h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b border-slate-700/50">
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm">Permission</th>
-                                <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Admin</th>
-                                <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Operator</th>
-                                <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Supplier</th>
-                                <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Seller</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {[
-                                { permission: 'Manage Users', admin: true, operator: false, supplier: false, seller: false },
-                                { permission: 'View Analytics', admin: true, operator: true, supplier: true, seller: false },
-                                { permission: 'Manage Products', admin: true, operator: true, supplier: true, seller: false },
-                                { permission: 'Process Orders', admin: true, operator: true, supplier: true, seller: true },
-                                { permission: 'System Settings', admin: true, operator: false, supplier: false, seller: false }
-                              ].map((perm, index) => (
-                                <motion.tr
-                                  key={index}
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                                  className="border-b border-slate-700/30 hover:bg-slate-700/20"
-                                >
-                                  <td className="py-4 px-6 text-white font-medium">{perm.permission}</td>
-                                  {['admin', 'operator', 'supplier', 'seller'].map((role) => (
-                                    <td key={role} className="py-4 px-6 text-center">
-                                      {perm[role as keyof typeof perm] ? (
-                                        <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
-                                      ) : (
-                                        <X className="w-5 h-5 text-slate-600 mx-auto" />
-                                      )}
-                                    </td>
-                                  ))}
-                                </motion.tr>
-                              ))}
-                            </tbody>
-                          </table>
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-xl font-bold text-white">Permission Matrix</h3>
+                          <button 
+                            onClick={() => router.push('/admin/permissions')}
+                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                          >
+                            Manage Permissions
+                          </button>
                         </div>
+                        
+                        {rbacLoading ? (
+                          <div className="animate-pulse">
+                            <div className="overflow-x-auto">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-slate-700/50">
+                                    <th className="text-left py-4 px-6">
+                                      <div className="w-24 h-4 bg-slate-700 rounded"></div>
+                                    </th>
+                                    <th className="text-center py-4 px-6">
+                                      <div className="w-16 h-4 bg-slate-700 rounded mx-auto"></div>
+                                    </th>
+                                    <th className="text-center py-4 px-6">
+                                      <div className="w-20 h-4 bg-slate-700 rounded mx-auto"></div>
+                                    </th>
+                                    <th className="text-center py-4 px-6">
+                                      <div className="w-18 h-4 bg-slate-700 rounded mx-auto"></div>
+                                    </th>
+                                    <th className="text-center py-4 px-6">
+                                      <div className="w-14 h-4 bg-slate-700 rounded mx-auto"></div>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {Array.from({ length: 5 }).map((_, index) => (
+                                    <tr key={index} className="border-b border-slate-700/30">
+                                      <td className="py-4 px-6">
+                                        <div className="w-32 h-4 bg-slate-700 rounded"></div>
+                                      </td>
+                                      {Array.from({ length: 4 }).map((_, i) => (
+                                        <td key={i} className="py-4 px-6 text-center">
+                                          <div className="w-5 h-5 bg-slate-700 rounded-full mx-auto"></div>
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        ) : permissionMatrix.length > 0 ? (
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b border-slate-700/50">
+                                  <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm">Permission</th>
+                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Admin</th>
+                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Operator</th>
+                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Supplier</th>
+                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Seller</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {permissionMatrix.map((perm, index) => (
+                                  <motion.tr
+                                    key={perm.id || index}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                    className="border-b border-slate-700/30 hover:bg-slate-700/20"
+                                  >
+                                    <td className="py-4 px-6 text-white font-medium">{perm.name}</td>
+                                    {['ADMIN', 'OPERATOR', 'SUPPLIER', 'SELLER'].map((role) => (
+                                      <td key={role} className="py-4 px-6 text-center">
+                                        {perm.roles && perm.roles[role] ? (
+                                          <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
+                                        ) : (
+                                          <X className="w-5 h-5 text-slate-600 mx-auto" />
+                                        )}
+                                      </td>
+                                    ))}
+                                  </motion.tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-slate-400">
+                            No permission data available
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

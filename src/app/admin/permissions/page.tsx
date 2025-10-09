@@ -5,13 +5,14 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { apiClient } from '@/lib/api';
 import { motion } from 'framer-motion';
 import {
   Shield,
@@ -39,6 +40,50 @@ export default function PermissionsManagement() {
   const [selectedRole, setSelectedRole] = useState('Admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
+  const [permissionChanges, setPermissionChanges] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const savePermissionChanges = useCallback(async () => {
+    if (Object.keys(permissionChanges).length === 0) {
+      setSaveMessage({ type: 'error', text: 'No changes to save' });
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // Group changes by permission ID
+      const changesByPermission: Record<string, Record<string, boolean>> = {};
+      
+      Object.entries(permissionChanges).forEach(([key, value]) => {
+        const [permissionId, role] = key.split('_');
+        if (!changesByPermission[permissionId]) {
+          changesByPermission[permissionId] = {};
+        }
+        changesByPermission[permissionId][role] = value;
+      });
+
+      // Send changes to backend
+      await apiClient.post('/permissions/toggle', {
+        changes: changesByPermission
+      });
+
+      // Clear changes after successful save
+      setPermissionChanges({});
+      setSaveMessage({ type: 'success', text: 'Permissions updated successfully!' });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveMessage(null), 3000);
+      
+    } catch (error) {
+      console.error('Error saving permissions:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to save permissions. Please try again.' });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [permissionChanges]);
 
   // Get role from URL parameters
   React.useEffect(() => {
@@ -129,8 +174,31 @@ export default function PermissionsManagement() {
 
   const getPermissionStatus = (permission: typeof permissions[0]) => {
     const roleKey = selectedRole.toLowerCase() as 'admin' | 'operator' | 'supplier' | 'seller';
-    return permission[roleKey];
+    const originalStatus = permission[roleKey];
+    const changeKey = `${permission.id}_${roleKey}`;
+    return permissionChanges[changeKey] !== undefined ? permissionChanges[changeKey] : originalStatus;
   };
+
+  const togglePermission = (permission: typeof permissions[0]) => {
+    const roleKey = selectedRole.toLowerCase() as 'admin' | 'operator' | 'supplier' | 'seller';
+    const changeKey = `${permission.id}_${roleKey}`;
+    const currentStatus = getPermissionStatus(permission);
+    
+    setPermissionChanges(prev => ({
+      ...prev,
+      [changeKey]: !currentStatus
+    }));
+    
+    // Clear any previous save messages
+    setSaveMessage(null);
+  };
+
+  const resetToDefaults = () => {
+    setPermissionChanges({});
+    setSaveMessage(null);
+  };
+
+  const hasUnsavedChanges = Object.keys(permissionChanges).length > 0;
 
   return (
     <ProtectedRoute>
@@ -244,11 +312,20 @@ export default function PermissionsManagement() {
                     <div className="space-y-3">
                       {categoryPerms.map((permission) => {
                         const hasPermission = getPermissionStatus(permission);
+                        const roleKey = selectedRole.toLowerCase() as 'admin' | 'operator' | 'supplier' | 'seller';
+                        const changeKey = `${permission.id}_${roleKey}`;
+                        const hasChanged = permissionChanges[changeKey] !== undefined;
+                        const originalStatus = permission[roleKey];
+                        
                         return (
                           <motion.div
                             key={permission.id}
                             whileHover={{ x: 4 }}
-                            className="flex items-center justify-between p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-all duration-200 group"
+                            className={`flex items-center justify-between p-4 rounded-xl hover:bg-slate-700/50 transition-all duration-200 group ${
+                              hasChanged 
+                                ? 'bg-blue-500/10 border border-blue-500/30' 
+                                : 'bg-slate-700/30'
+                            }`}
                           >
                             <div className="flex items-center space-x-4 flex-1">
                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
@@ -261,10 +338,22 @@ export default function PermissionsManagement() {
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="text-white font-medium group-hover:text-purple-300 transition-colors">
-                                  {permission.name}
-                                </h4>
+                                <div className="flex items-center space-x-2">
+                                  <h4 className="text-white font-medium group-hover:text-purple-300 transition-colors">
+                                    {permission.name}
+                                  </h4>
+                                  {hasChanged && (
+                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-semibold">
+                                      Modified
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-sm text-slate-400">{permission.description}</p>
+                                {hasChanged && (
+                                  <p className="text-xs text-blue-300 mt-1">
+                                    Changed from {originalStatus ? 'Enabled' : 'Disabled'} to {hasPermission ? 'Enabled' : 'Disabled'}
+                                  </p>
+                                )}
                               </div>
                             </div>
 
@@ -277,11 +366,13 @@ export default function PermissionsManagement() {
                                 {hasPermission ? 'Enabled' : 'Disabled'}
                               </span>
                               <button
-                                className={`p-2 rounded-lg transition-all duration-200 ${
+                                onClick={() => togglePermission(permission)}
+                                className={`p-2 rounded-lg transition-all duration-200 cursor-pointer ${
                                   hasPermission
-                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                                    : 'bg-slate-600/20 text-slate-400 hover:bg-slate-600/30'
+                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30 hover:scale-105'
+                                    : 'bg-slate-600/20 text-slate-400 hover:bg-slate-600/30 hover:scale-105'
                                 }`}
+                                title={`Click to ${hasPermission ? 'disable' : 'enable'} this permission`}
                               >
                                 {hasPermission ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
                               </button>
@@ -300,14 +391,45 @@ export default function PermissionsManagement() {
             <div className="flex items-center space-x-3">
               <RefreshCw className="w-5 h-5 text-slate-400" />
               <span className="text-slate-300">Last updated: Just now</span>
+              {hasUnsavedChanges && (
+                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-lg text-xs font-semibold">
+                  {Object.keys(permissionChanges).length} unsaved changes
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-3">
-              <button className="px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 border border-slate-600/50">
+              {saveMessage && (
+                <div className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  saveMessage.type === 'success' 
+                    ? 'bg-green-500/20 text-green-300' 
+                    : 'bg-red-500/20 text-red-300'
+                }`}>
+                  {saveMessage.text}
+                </div>
+              )}
+              <button 
+                onClick={resetToDefaults}
+                disabled={!hasUnsavedChanges}
+                className="px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 border border-slate-600/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 Reset to Defaults
               </button>
-              <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2">
-                <Save className="w-5 h-5" />
-                <span>Save All Changes</span>
+              <button 
+                onClick={savePermissionChanges}
+                disabled={!hasUnsavedChanges || isSaving}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    <span>Save All Changes</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
