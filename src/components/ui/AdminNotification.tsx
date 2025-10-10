@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, CheckCircle, AlertCircle, Info, UserPlus } from 'lucide-react';
 
@@ -11,15 +11,15 @@ export interface AdminNotification {
   message: string;
   timestamp: Date;
   read: boolean;
-  data?: any;
+  data?: unknown;
 }
 
 interface AdminNotificationProps {
   notifications: AdminNotification[];
   onMarkAsRead: (id: string) => void;
   onRemove: (id: string) => void;
-  onApproveSupplier?: (supplierData: any) => void;
-  onRejectSupplier?: (supplierData: any) => void;
+  onApproveSupplier?: (supplierData: unknown) => void;
+  onRejectSupplier?: (supplierData: unknown) => void;
 }
 
 export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
@@ -47,20 +47,6 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
     }
   };
 
-  const getBgColor = (type: string) => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-500/10 border-green-500/20';
-      case 'error':
-        return 'bg-red-500/10 border-red-500/20';
-      case 'warning':
-        return 'bg-yellow-500/10 border-yellow-500/20';
-      case 'supplier_pending':
-        return 'bg-blue-500/10 border-blue-500/20';
-      default:
-        return 'bg-blue-500/10 border-blue-500/20';
-    }
-  };
 
   const formatTime = (timestamp: Date) => {
     const now = new Date();
@@ -148,7 +134,7 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
                         </p>
 
                         {/* Supplier Pending Actions */}
-                        {notification.type === 'supplier_pending' && notification.data && (
+                        {notification.type === 'supplier_pending' && !!notification.data && (
                           <div className="mt-3 flex space-x-2">
                             <button
                               onClick={() => {

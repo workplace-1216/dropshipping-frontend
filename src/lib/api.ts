@@ -31,9 +31,18 @@ export interface LoginCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   role?: 'ADMIN' | 'OPERATOR' | 'SUPPLIER' | 'SELLER';
+  // Supplier-specific fields
+  companyName?: string;
+  contactName?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  taxId?: string;
+  website?: string;
 }
 
 class ApiClient {

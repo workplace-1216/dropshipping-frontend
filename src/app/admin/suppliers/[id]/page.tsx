@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Header } from '@/components/layout/Header';
@@ -24,9 +23,6 @@ import {
   TrendingUp,
   Edit,
   Trash2,
-  CheckCircle,
-  AlertCircle,
-  Clock,
   XCircle
 } from 'lucide-react';
 
@@ -55,21 +51,14 @@ interface Supplier {
 export default function SupplierViewPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
-  const { t } = useLanguage();
+  const { isAuthenticated, isLoading } = useAuth();
   const { alertState, showSuccess, showError, closeAlert } = useAlertModal();
   
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [loadingSupplier, setLoadingSupplier] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  useEffect(() => {
-    if (params.id && isAuthenticated) {
-      fetchSupplier();
-    }
-  }, [params.id, isAuthenticated]);
-
-  const fetchSupplier = async () => {
+  const fetchSupplier = useCallback(async () => {
     try {
       setLoadingSupplier(true);
       const response = await apiClient.get<Supplier>(`/suppliers/${params.id}`);
@@ -80,7 +69,13 @@ export default function SupplierViewPage() {
     } finally {
       setLoadingSupplier(false);
     }
-  };
+  }, [params.id, showError]);
+
+  useEffect(() => {
+    if (params.id && isAuthenticated) {
+      fetchSupplier();
+    }
+  }, [params.id, isAuthenticated, fetchSupplier]);
 
   const handleDelete = async () => {
     if (!supplier) return;
@@ -97,20 +92,6 @@ export default function SupplierViewPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ACTIVE':
-        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-      case 'PENDING':
-        return <Clock className="w-5 h-5 text-yellow-500" />;
-      case 'SUSPENDED':
-        return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'INACTIVE':
-        return <AlertCircle className="w-5 h-5 text-slate-500" />;
-      default:
-        return <AlertCircle className="w-5 h-5 text-slate-500" />;
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -127,8 +108,8 @@ export default function SupplierViewPage() {
     }
   };
 
-  if (loading || loadingSupplier) {
-    return <PageLoader />;
+  if (isLoading || loadingSupplier) {
+    return <PageLoader isLoading={true} message="Loading supplier details..." />;
   }
 
   if (!supplier) {
@@ -142,7 +123,7 @@ export default function SupplierViewPage() {
                 <XCircle className="w-12 h-12 text-red-500" />
               </div>
               <h1 className="text-3xl font-bold text-white mb-4">Supplier Not Found</h1>
-              <p className="text-slate-400 mb-8">The supplier you're looking for doesn't exist or has been removed.</p>
+              <p className="text-slate-400 mb-8">The supplier you&apos;re looking for doesn&apos;t exist or has been removed.</p>
               <button
                 onClick={() => router.push('/admin')}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2 mx-auto"

@@ -16,7 +16,6 @@ import { Header } from '@/components/layout/Header';
 import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { motion } from 'framer-motion';
 import {
-  Shield,
   ArrowLeft,
   Check,
   X,

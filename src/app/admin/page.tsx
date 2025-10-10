@@ -43,13 +43,10 @@ import {
   Upload,
   Edit,
   Trash2,
-  LogOut,
   BookOpen,
   AlertTriangle,
   XCircle,
   ArrowRight,
-  Menu,
-  Bell,
   User,
   X,
   RefreshCw,
@@ -65,7 +62,7 @@ import {
 } from 'lucide-react';
 
 function AdminDashboard() {
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -98,11 +95,12 @@ function AdminDashboard() {
   const { notifications, addNotification, markAsRead, removeNotification } = useAdminNotifications();
 
   // Handle supplier approval/rejection
-  const handleApproveSupplier = async (supplierData: any) => {
+  const handleApproveSupplier = async (supplierData: unknown) => {
     try {
+      const supplier = supplierData as Supplier;
       await apiClient.post('/notifications/approve-supplier', {
-        supplierId: supplierData.id,
-        supplierData: supplierData,
+        supplierId: supplier.id,
+        supplierData: supplier,
       });
       showSuccess('Supplier Approved', 'The supplier has been approved and can now access the platform.');
     } catch (error) {
@@ -111,11 +109,12 @@ function AdminDashboard() {
     }
   };
 
-  const handleRejectSupplier = async (supplierData: any) => {
+  const handleRejectSupplier = async (supplierData: unknown) => {
     try {
+      const supplier = supplierData as Supplier;
       await apiClient.post('/notifications/reject-supplier', {
-        supplierId: supplierData.id,
-        supplierData: supplierData,
+        supplierId: supplier.id,
+        supplierData: supplier,
       });
       showSuccess('Supplier Rejected', 'The supplier has been rejected and will be notified.');
     } catch (error) {
@@ -215,15 +214,6 @@ function AdminDashboard() {
     }
   }, [isAuthenticated, isLoading, router, user]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
   // RBAC Data Fetching Functions
   const fetchUsersByRole = useCallback(async () => {
     try {
@@ -262,7 +252,7 @@ function AdminDashboard() {
     setSuppliersLoading(true);
     try {
       console.log('Fetching suppliers...');
-      const response = await apiClient.get<{ suppliers: Supplier[], pagination: any }>('/suppliers');
+      const response = await apiClient.get<{ suppliers: Supplier[], pagination: { page: number; limit: number; total: number } }>('/suppliers');
       console.log('Suppliers API response:', response);
       
       // Handle paginated response structure
@@ -421,11 +411,32 @@ function AdminDashboard() {
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     try {
-      const response = await apiClient.get('/notifications');
+      interface BackendNotification {
+        id: string;
+        type: string;
+        title: string;
+        message: string;
+        createdAt: string;
+        read: boolean;
+        data?: string;
+      }
+      
+      const response = await apiClient.get<{ data: BackendNotification[] }>('/notifications');
+      
+      // Map backend notification types to frontend types
+      const mapNotificationType = (backendType: string): AdminNotification['type'] => {
+        const type = backendType.toLowerCase();
+        if (type === 'supplier' || type === 'supplier_pending') return 'supplier_pending';
+        if (type === 'error') return 'error';
+        if (type === 'warning') return 'warning';
+        if (type === 'success') return 'success';
+        return 'info'; // default for order, user, product, system
+      };
+      
       // Convert backend notifications to frontend format
-      const formattedNotifications: AdminNotification[] = response.data.map((notif: any) => ({
+      const formattedNotifications: AdminNotification[] = response.data.map((notif: BackendNotification) => ({
         id: notif.id,
-        type: notif.type.toLowerCase() as any,
+        type: mapNotificationType(notif.type),
         title: notif.title,
         message: notif.message,
         timestamp: new Date(notif.createdAt),
@@ -984,7 +995,7 @@ function AdminDashboard() {
                                   <td colSpan={6} className="py-12 text-center">
                                     <Store className="w-12 h-12 text-slate-600 mx-auto mb-4" />
                                     <p className="text-slate-400 text-lg">No suppliers found</p>
-                                    <p className="text-slate-500 text-sm mt-2">Click "Add New Supplier" to get started</p>
+                                    <p className="text-slate-500 text-sm mt-2">Click &ldquo;Add New Supplier&rdquo; to get started</p>
                                   </td>
                                 </tr>
                               ) : suppliers.map((supplier, index) => (

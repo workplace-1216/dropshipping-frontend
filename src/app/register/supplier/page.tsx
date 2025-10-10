@@ -93,7 +93,7 @@ export default function SupplierRegisterPage() {
       // Add supplier role to registration data
       const supplierData = {
         ...registerData,
-        role: 'SUPPLIER'
+        role: 'SUPPLIER' as const
       };
 
       console.log('Calling registerUser with supplier data...');
