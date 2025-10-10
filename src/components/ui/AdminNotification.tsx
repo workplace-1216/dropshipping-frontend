@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, CheckCircle, AlertCircle, Info, UserPlus } from 'lucide-react';
+import { Bell, X, CheckCircle, AlertCircle, Info, UserPlus, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export interface AdminNotification {
   id: string;
@@ -31,6 +32,25 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  // Click outside to close modal
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -61,8 +81,13 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
     return `${days}d ago`;
   };
 
+  const handleViewAllNotifications = () => {
+    setIsOpen(false);
+    router.push('/admin/notifications');
+  };
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       {/* Notification Bell */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -88,7 +113,7 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 top-full mt-2 w-96 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto"
+            className="absolute right-0 top-full mt-2 w-96 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden"
           >
             <div className="p-4 border-b border-gray-700">
               <div className="flex items-center justify-between">
@@ -109,7 +134,7 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
                   <p>No notifications</p>
                 </div>
               ) : (
-                notifications.map((notification) => (
+                notifications.slice(0, 5).map((notification) => (
                   <motion.div
                     key={notification.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -178,6 +203,22 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
                 ))
               )}
             </div>
+
+            {/* View All Notifications Footer */}
+            <div className="p-3 border-t border-gray-700 bg-gray-800/50">
+              <button
+                onClick={handleViewAllNotifications}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-blue-400 hover:text-blue-300 hover:bg-gray-700/50 rounded-lg transition-all duration-200"
+              >
+                <span>View All Notifications</span>
+                <ExternalLink className="w-4 h-4" />
+              </button>
+              {notifications.length > 5 && (
+                <p className="text-center text-xs text-gray-500 mt-1">
+                  +{notifications.length - 5} more notifications
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -189,14 +230,20 @@ export const AdminNotificationComponent: React.FC<AdminNotificationProps> = ({
 export const useAdminNotifications = () => {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
 
-  const addNotification = (notification: Omit<AdminNotification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = (notification: Omit<AdminNotification, 'timestamp' | 'read'> | Omit<AdminNotification, 'id' | 'timestamp' | 'read'>) => {
     const newNotification: AdminNotification = {
       ...notification,
-      id: Date.now().toString(),
+      id: 'id' in notification ? notification.id : `${Date.now()}-${Math.random()}`,
       timestamp: new Date(),
       read: false,
     };
-    setNotifications(prev => [newNotification, ...prev]);
+    
+    // Prevent duplicates by checking if notification with same ID already exists
+    setNotifications(prev => {
+      const exists = prev.some(n => n.id === newNotification.id);
+      if (exists) return prev;
+      return [newNotification, ...prev];
+    });
   };
 
   const markAsRead = (id: string) => {

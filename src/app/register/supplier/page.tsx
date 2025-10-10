@@ -83,6 +83,9 @@ export default function SupplierRegisterPage() {
   });
 
   const onSubmit = async (data: SupplierRegisterFormData) => {
+    // Prevent multiple submissions
+    if (isSubmitting) return;
+    
     try {
       setError('');
       setIsSubmitting(true);
@@ -106,6 +109,9 @@ export default function SupplierRegisterPage() {
         'Supplier Account Created Successfully!',
         `Your supplier account has been created and is pending admin approval. You will be notified once approved. Please wait for admin approval before accessing your supplier dashboard.`
       );
+      
+      // Reset form on success
+      setIsSubmitting(false);
     } catch (err: unknown) {
       setIsSubmitting(false);
       console.error('Supplier registration error:', err);

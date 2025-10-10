@@ -421,7 +421,12 @@ function AdminDashboard() {
         data?: string;
       }
       
-      const response = await apiClient.get<{ data: BackendNotification[] }>('/notifications');
+      const response = await apiClient.get('/notifications') as BackendNotification[] | { data: BackendNotification[] };
+      
+      // Handle different response structures
+      const backendNotifications: BackendNotification[] = Array.isArray(response) 
+        ? response 
+        : (response as { data: BackendNotification[] })?.data || [];
       
       // Map backend notification types to frontend types
       const mapNotificationType = (backendType: string): AdminNotification['type'] => {
@@ -433,24 +438,14 @@ function AdminDashboard() {
         return 'info'; // default for order, user, product, system
       };
       
-      // Convert backend notifications to frontend format
-      const formattedNotifications: AdminNotification[] = response.data.map((notif: BackendNotification) => ({
-        id: notif.id,
-        type: mapNotificationType(notif.type),
-        title: notif.title,
-        message: notif.message,
-        timestamp: new Date(notif.createdAt),
-        read: notif.read,
-        data: notif.data ? JSON.parse(notif.data) : undefined,
-      }));
-      
-      // Add notifications to the hook
-      formattedNotifications.forEach(notif => {
+      // Convert backend notifications to frontend format and add them
+      backendNotifications.forEach((notif: BackendNotification) => {
         addNotification({
-          type: notif.type,
+          id: notif.id,
+          type: mapNotificationType(notif.type),
           title: notif.title,
           message: notif.message,
-          data: notif.data,
+          data: notif.data ? JSON.parse(notif.data) : undefined,
         });
       });
     } catch (error) {
@@ -458,15 +453,21 @@ function AdminDashboard() {
     }
   }, [addNotification]);
 
+  // Fetch notifications on component mount
+  useEffect(() => {
+    if (isAuthenticated && user?.email === 'admin@admin.com') {
+      fetchNotifications();
+    }
+  }, [isAuthenticated, user, fetchNotifications]);
+
   // Load RBAC data when RBAC module is active
   useEffect(() => {
     if (activeModule === 'rbac' && isAuthenticated) {
       fetchUsersByRole();
       fetchRecentUsers();
       fetchPermissionMatrix();
-      fetchNotifications();
     }
-  }, [activeModule, isAuthenticated, fetchUsersByRole, fetchRecentUsers, fetchPermissionMatrix, fetchNotifications]);
+  }, [activeModule, isAuthenticated, fetchUsersByRole, fetchRecentUsers, fetchPermissionMatrix]);
 
   // Load suppliers data when suppliers module is active
   useEffect(() => {
@@ -832,7 +833,6 @@ function AdminDashboard() {
                             <h3 className="text-lg font-bold text-white mb-4">{t('admin.quickActions')}</h3>
                             <div className="space-y-3">
                               {[
-                                { icon: Plus, text: 'Add New Supplier', color: 'emerald', action: () => setShowSupplierModal(true) },
                                 { icon: Settings, text: t('admin.systemSettings'), color: 'blue', action: () => {} },
                                 { icon: BarChart3, text: 'View Reports', color: 'purple', action: () => {} },
                                 { icon: Shield, text: 'Security Audit', color: 'orange', action: () => {} }
@@ -863,13 +863,6 @@ function AdminDashboard() {
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">Manage isolated supplier environments and their configurations</p>
                         </div>
-                        <button 
-                          onClick={() => setShowSupplierModal(true)}
-                          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl hover:from-emerald-600 hover:to-green-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
-                        >
-                          <Plus className="w-5 h-5" />
-                          <span className="font-semibold">Add New Supplier</span>
-                        </button>
                       </div>
 
                       {/* Supplier Stats */}
@@ -995,7 +988,7 @@ function AdminDashboard() {
                                   <td colSpan={6} className="py-12 text-center">
                                     <Store className="w-12 h-12 text-slate-600 mx-auto mb-4" />
                                     <p className="text-slate-400 text-lg">No suppliers found</p>
-                                    <p className="text-slate-500 text-sm mt-2">Click &ldquo;Add New Supplier&rdquo; to get started</p>
+                                    <p className="text-slate-500 text-sm mt-2">Suppliers will appear here when they register</p>
                                   </td>
                                 </tr>
                               ) : suppliers.map((supplier, index) => (
