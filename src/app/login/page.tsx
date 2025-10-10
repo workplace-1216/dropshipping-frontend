@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToastHelpers } from '@/components/ui/Toast';
+import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { getAuthRedirectUrl } from '@/lib/redirect';
 import { googleAuth } from '@/lib/google-auth';
 import { Input } from '@/components/ui/Input';
@@ -28,6 +29,7 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { t, currentLanguage } = useLanguage();
   const toast = useToastHelpers();
+  const { alertState, showError, closeAlert } = useAlertModal();
   const [error, setError] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -70,13 +72,20 @@ export default function LoginPage() {
       
       if (errorMessage === 'Invalid email or password') {
         displayError = t('auth.invalidCredentials');
+      } else if (errorMessage?.includes('pending approval')) {
+        // Show alarm modal for pending supplier accounts
+        showError(
+          'Account Pending Approval',
+          'Your supplier account is pending admin approval. Please wait for approval before accessing your dashboard.'
+        );
+        return; // Don't show toast, alarm modal handles it
       } else {
         displayError = t('auth.loginFailed');
       }
       
       setError(displayError);
       
-      // Show error toast
+      // Show error toast for other errors
       toast.error(
         'Login Failed',
         displayError
@@ -516,6 +525,15 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        onClose={closeAlert}
+      />
     </div>
   );
 }

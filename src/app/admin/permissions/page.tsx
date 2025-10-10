@@ -9,10 +9,11 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { apiClient } from '@/lib/api';
+import { Header } from '@/components/layout/Header';
+import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { motion } from 'framer-motion';
 import {
   Shield,
@@ -31,6 +32,10 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
+  Crown,
+  Cog,
+  Store,
+  Briefcase
 } from 'lucide-react';
 
 export default function PermissionsManagement() {
@@ -43,10 +48,21 @@ export default function PermissionsManagement() {
   const [permissionChanges, setPermissionChanges] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [permissionMatrix, setPermissionMatrix] = useState<Record<string, Record<string, boolean>>>({});
+  const { alertState, showSuccess, showError, showWarning, closeAlert } = useAlertModal();
+
+  const fetchPermissionMatrix = useCallback(async () => {
+    try {
+      const response = await apiClient.get<{ permissions: unknown[], matrix: Record<string, Record<string, boolean>> }>('/permissions/matrix');
+      setPermissionMatrix(response.matrix || {});
+    } catch (error) {
+      console.error('Error fetching permission matrix:', error);
+    }
+  }, []);
 
   const savePermissionChanges = useCallback(async () => {
     if (Object.keys(permissionChanges).length === 0) {
-      setSaveMessage({ type: 'error', text: 'No changes to save' });
+      showWarning('No Changes to Save', 'You haven\'t made any changes to the permissions yet.');
       return;
     }
 
@@ -65,25 +81,36 @@ export default function PermissionsManagement() {
         changesByPermission[permissionId][role] = value;
       });
 
+      console.log('Sending permission changes:', changesByPermission);
+
       // Send changes to backend
-      await apiClient.post('/permissions/toggle', {
+      const response = await apiClient.post('/permissions/toggle', {
         changes: changesByPermission
       });
 
+      console.log('Permission save response:', response);
+
+      // Refresh permission matrix from backend
+      await fetchPermissionMatrix();
+
       // Clear changes after successful save
       setPermissionChanges({});
-      setSaveMessage({ type: 'success', text: 'Permissions updated successfully!' });
       
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveMessage(null), 3000);
+      showSuccess(
+        'Permissions Updated Successfully!', 
+        `${Object.keys(permissionChanges).length} permission ${Object.keys(permissionChanges).length === 1 ? 'change has' : 'changes have'} been saved to the system.`
+      );
       
     } catch (error) {
       console.error('Error saving permissions:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to save permissions. Please try again.' });
+      showError(
+        'Failed to Save Permissions', 
+        'There was an error saving the permission changes. Please check your connection and try again.'
+      );
     } finally {
       setIsSaving(false);
     }
-  }, [permissionChanges]);
+  }, [permissionChanges, fetchPermissionMatrix, showSuccess, showError, showWarning]);
 
   // Get role from URL parameters
   React.useEffect(() => {
@@ -103,6 +130,13 @@ export default function PermissionsManagement() {
     }
   }, [isAuthenticated, isLoading, user, router]);
 
+  // Load permission matrix on mount
+  React.useEffect(() => {
+    if (isAuthenticated && user?.email === 'admin@admin.com') {
+      fetchPermissionMatrix();
+    }
+  }, [isAuthenticated, user, fetchPermissionMatrix]);
+
   if (!isAuthenticated || user?.email !== 'admin@admin.com') {
     return null;
   }
@@ -112,10 +146,10 @@ export default function PermissionsManagement() {
   }
 
   const roles = [
-    { name: 'Admin', color: 'from-purple-500 to-purple-600', users: 3 },
-    { name: 'Operator', color: 'from-blue-500 to-blue-600', users: 12 },
-    { name: 'Supplier', color: 'from-green-500 to-green-600', users: 156 },
-    { name: 'Seller', color: 'from-orange-500 to-orange-600', users: 847 }
+    { name: 'Admin', color: 'from-red-500 to-pink-600', icon: Crown, users: 3 },
+    { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: Cog, users: 12 },
+    { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: Store, users: 156 },
+    { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: Briefcase, users: 847 }
   ];
 
   const permissionCategories = [
@@ -174,9 +208,21 @@ export default function PermissionsManagement() {
 
   const getPermissionStatus = (permission: typeof permissions[0]) => {
     const roleKey = selectedRole.toLowerCase() as 'admin' | 'operator' | 'supplier' | 'seller';
-    const originalStatus = permission[roleKey];
+    const roleKeyUpper = roleKey.toUpperCase();
     const changeKey = `${permission.id}_${roleKey}`;
-    return permissionChanges[changeKey] !== undefined ? permissionChanges[changeKey] : originalStatus;
+    
+    // If there's a pending change, use that
+    if (permissionChanges[changeKey] !== undefined) {
+      return permissionChanges[changeKey];
+    }
+    
+    // Otherwise, use the value from the backend matrix
+    if (permissionMatrix[roleKeyUpper] && permissionMatrix[roleKeyUpper][permission.id] !== undefined) {
+      return permissionMatrix[roleKeyUpper][permission.id];
+    }
+    
+    // Fall back to hardcoded default
+    return permission[roleKey];
   };
 
   const togglePermission = (permission: typeof permissions[0]) => {
@@ -194,14 +240,26 @@ export default function PermissionsManagement() {
   };
 
   const resetToDefaults = () => {
+    if (Object.keys(permissionChanges).length === 0) {
+      showWarning('No Changes to Reset', 'There are no pending changes to reset.');
+      return;
+    }
+    
     setPermissionChanges({});
     setSaveMessage(null);
+    
+    showSuccess(
+      'Changes Reset Successfully', 
+      'All pending permission changes have been discarded and reset to their original values.'
+    );
   };
 
   const hasUnsavedChanges = Object.keys(permissionChanges).length > 0;
 
   return (
     <ProtectedRoute>
+      <Header title={t('admin.permissionManagement')} />
+      
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -221,15 +279,6 @@ export default function PermissionsManagement() {
                 </h1>
                 <p className="text-slate-400">{t('admin.configureRoleBasedAccess')}</p>
               </div>
-              <div className="flex items-center space-x-4">
-                {/* Language Switcher */}
-                <LanguageSwitcher />
-                
-                <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                  <Save className="w-5 h-5" />
-                  <span>{t('admin.saveChanges')}</span>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -248,7 +297,7 @@ export default function PermissionsManagement() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <Shield className="w-6 h-6" />
+                  <role.icon className="w-6 h-6" />
                   <span className="text-sm opacity-80">{role.users} users</span>
                 </div>
                 <h3 className="text-xl font-bold">{role.name}</h3>
@@ -435,6 +484,16 @@ export default function PermissionsManagement() {
           </div>
         </div>
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        onClose={closeAlert}
+      />
     </ProtectedRoute>
   );
 }

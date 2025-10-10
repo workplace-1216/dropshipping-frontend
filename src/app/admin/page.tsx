@@ -4,10 +4,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
-import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { apiClient } from '@/lib/api';
+import { Header } from '@/components/layout/Header';
+import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
+import { AdminNotificationComponent, useAdminNotifications, AdminNotification } from '@/components/ui/AdminNotification';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Package, 
@@ -53,7 +55,13 @@ import {
   RefreshCw,
   MapPin,
   Star,
-  Users
+  Users,
+  Crown,
+  Cog,
+  Store,
+  Briefcase,
+  Heart,
+  Music
 } from 'lucide-react';
 
 function AdminDashboard() {
@@ -78,20 +86,96 @@ function AdminDashboard() {
     isActive: boolean;
   }
 
-  interface PermissionMatrixItem {
-    id: string;
-    name: string;
-    roles?: {
-      [key: string]: boolean;
-    };
-  }
 
   // RBAC Data State
   const [usersByRole, setUsersByRole] = useState<Record<string, number>>({});
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
-  const [permissionMatrix, setPermissionMatrix] = useState<PermissionMatrixItem[]>([]);
   const [rbacLoading, setRbacLoading] = useState(false);
   const [rbacError, setRbacError] = useState<string | null>(null);
+  const [permissionMatrix, setPermissionMatrix] = useState<{ id: string; name: string; category: string; }[]>([]);
+  const [matrixData, setMatrixData] = useState<Record<string, Record<string, boolean>>>({});
+  const { alertState, showSuccess, showError, showInfo, closeAlert } = useAlertModal();
+  const { notifications, addNotification, markAsRead, removeNotification } = useAdminNotifications();
+
+  // Handle supplier approval/rejection
+  const handleApproveSupplier = async (supplierData: any) => {
+    try {
+      await apiClient.post('/notifications/approve-supplier', {
+        supplierId: supplierData.id,
+        supplierData: supplierData,
+      });
+      showSuccess('Supplier Approved', 'The supplier has been approved and can now access the platform.');
+    } catch (error) {
+      console.error('Error approving supplier:', error);
+      showError('Approval Failed', 'Failed to approve the supplier. Please try again.');
+    }
+  };
+
+  const handleRejectSupplier = async (supplierData: any) => {
+    try {
+      await apiClient.post('/notifications/reject-supplier', {
+        supplierId: supplierData.id,
+        supplierData: supplierData,
+      });
+      showSuccess('Supplier Rejected', 'The supplier has been rejected and will be notified.');
+    } catch (error) {
+      console.error('Error rejecting supplier:', error);
+      showError('Rejection Failed', 'Failed to reject the supplier. Please try again.');
+    }
+  };
+  
+  // Supplier Modal State
+  const [showSupplierModal, setShowSupplierModal] = useState(false);
+  const [newSupplier, setNewSupplier] = useState({
+    companyName: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    country: '',
+    taxId: '',
+    website: ''
+  });
+  
+  // Supplier Data State
+  interface Supplier {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    country?: string;
+    contactName?: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    city?: string;
+    taxId?: string;
+    website?: string;
+    status: string; // ACTIVE, PENDING, SUSPENDED, INACTIVE from database
+    isActive: boolean;
+    productCount: number;
+    activeOrders: number;
+    revenue: number;
+    createdAt: string;
+    updatedAt: string;
+  }
+  
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierStats, setSupplierStats] = useState({
+    total: 0,
+    active: 0,
+    pending: 0,
+    suspended: 0
+  });
+  const [suppliersLoading, setSuppliersLoading] = useState(false);
+
+  // Supplier modals state
+  const [showEditSupplierModal, setShowEditSupplierModal] = useState(false);
+  const [showDeleteSupplierModal, setShowDeleteSupplierModal] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+  const [editSupplier, setEditSupplier] = useState<Partial<Supplier>>({});
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
 
   // Persist active module to localStorage
   React.useEffect(() => {
@@ -166,12 +250,202 @@ function AdminDashboard() {
 
   const fetchPermissionMatrix = useCallback(async () => {
     try {
-      const data = await apiClient.get<PermissionMatrixItem[]>('/permissions/matrix');
-      setPermissionMatrix(data);
+      const response = await apiClient.get<{ permissions: { id: string; name: string; category: string; }[], matrix: Record<string, Record<string, boolean>> }>('/permissions/matrix');
+      setPermissionMatrix(response.permissions || []);
+      setMatrixData(response.matrix || {});
     } catch (error) {
       console.error('Error fetching permission matrix:', error);
     }
   }, []);
+
+  const fetchSuppliers = useCallback(async () => {
+    setSuppliersLoading(true);
+    try {
+      console.log('Fetching suppliers...');
+      const response = await apiClient.get<{ suppliers: Supplier[], pagination: any }>('/suppliers');
+      console.log('Suppliers API response:', response);
+      
+      // Handle paginated response structure
+      const supplierData = response?.suppliers || [];
+      console.log('Processed supplier data:', supplierData);
+      setSuppliers(supplierData);
+      
+      // Calculate stats based on actual database status codes
+      const stats = {
+        total: supplierData.length,
+        active: supplierData.filter(s => s.status === 'ACTIVE').length,
+        pending: supplierData.filter(s => s.status === 'PENDING').length,
+        suspended: supplierData.filter(s => s.status === 'SUSPENDED').length
+      };
+      console.log('Supplier stats:', stats);
+      setSupplierStats(stats);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+      setSuppliers([]);
+    } finally {
+      setSuppliersLoading(false);
+    }
+  }, []);
+
+  const handleAddSupplier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Make API call to create the supplier
+      await apiClient.post('/suppliers', {
+        name: newSupplier.companyName,
+        email: newSupplier.email,
+        contactName: newSupplier.contactName,
+        contactEmail: newSupplier.email,
+        contactPhone: newSupplier.phone,
+        phone: newSupplier.phone,
+        address: newSupplier.address,
+        city: newSupplier.city,
+        country: newSupplier.country,
+        taxId: newSupplier.taxId || undefined,
+        website: newSupplier.website || undefined,
+        isActive: true
+      });
+      
+      const supplierName = newSupplier.companyName;
+      
+      setShowSupplierModal(false);
+      setNewSupplier({
+        companyName: '',
+        contactName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        country: '',
+        taxId: '',
+        website: ''
+      });
+      
+      // Refresh suppliers list
+      await fetchSuppliers();
+      
+      showSuccess(
+        'Supplier Added Successfully!',
+        `${supplierName} has been added to the system.`
+      );
+    } catch (error) {
+      console.error('Error creating supplier:', error);
+      showError(
+        'Failed to Add Supplier',
+        'There was an error creating the supplier. Please check the information and try again.'
+      );
+    }
+  };
+
+  // Supplier action handlers
+  const openEditSupplierModal = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setEditSupplier({
+      name: supplier.name,
+      email: supplier.email,
+      phone: supplier.phone,
+      address: supplier.address,
+      country: supplier.country,
+      contactName: supplier.contactName,
+      contactEmail: supplier.contactEmail,
+      contactPhone: supplier.contactPhone,
+      city: supplier.city,
+      taxId: supplier.taxId,
+      website: supplier.website,
+      status: supplier.status,
+      isActive: supplier.isActive
+    });
+    setShowEditSupplierModal(true);
+  };
+
+  const openDeleteSupplierModal = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setShowDeleteSupplierModal(true);
+  };
+
+  const handleEditSupplier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSupplier) return;
+
+    try {
+      await apiClient.patch(`/suppliers/${selectedSupplier.id}`, editSupplier);
+      
+      setShowEditSupplierModal(false);
+      setSelectedSupplier(null);
+      setEditSupplier({});
+      
+      await fetchSuppliers(); // Refresh suppliers list
+      showSuccess('Supplier Updated Successfully!', `${editSupplier.name} has been updated.`);
+    } catch (error) {
+      console.error('Error updating supplier:', error);
+      showError('Failed to Update Supplier', 'There was an error updating the supplier. Please try again.');
+    }
+  };
+
+  const handleDeleteSupplier = async () => {
+    if (!selectedSupplier) return;
+
+    try {
+      await apiClient.delete(`/suppliers/${selectedSupplier.id}`);
+      
+      setShowDeleteSupplierModal(false);
+      const deletedSupplierName = selectedSupplier.name;
+      setSelectedSupplier(null);
+      
+      await fetchSuppliers(); // Refresh suppliers list
+      showSuccess('Supplier Deleted Successfully!', `${deletedSupplierName} has been removed from the system.`);
+    } catch (error) {
+      console.error('Error deleting supplier:', error);
+      showError('Failed to Delete Supplier', 'There was an error deleting the supplier. Please try again.');
+    }
+  };
+
+  const viewSupplier = (supplier: Supplier) => {
+    // Navigate to supplier view page
+    router.push(`/admin/suppliers/${supplier.id}`);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showStatusDropdown && !(event.target as Element).closest('.status-dropdown')) {
+        setShowStatusDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showStatusDropdown]);
+
+  // Fetch notifications
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const response = await apiClient.get('/notifications');
+      // Convert backend notifications to frontend format
+      const formattedNotifications: AdminNotification[] = response.data.map((notif: any) => ({
+        id: notif.id,
+        type: notif.type.toLowerCase() as any,
+        title: notif.title,
+        message: notif.message,
+        timestamp: new Date(notif.createdAt),
+        read: notif.read,
+        data: notif.data ? JSON.parse(notif.data) : undefined,
+      }));
+      
+      // Add notifications to the hook
+      formattedNotifications.forEach(notif => {
+        addNotification({
+          type: notif.type,
+          title: notif.title,
+          message: notif.message,
+          data: notif.data,
+        });
+      });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, [addNotification]);
 
   // Load RBAC data when RBAC module is active
   useEffect(() => {
@@ -179,8 +453,16 @@ function AdminDashboard() {
       fetchUsersByRole();
       fetchRecentUsers();
       fetchPermissionMatrix();
+      fetchNotifications();
     }
-  }, [activeModule, isAuthenticated, fetchUsersByRole, fetchRecentUsers, fetchPermissionMatrix]);
+  }, [activeModule, isAuthenticated, fetchUsersByRole, fetchRecentUsers, fetchPermissionMatrix, fetchNotifications]);
+
+  // Load suppliers data when suppliers module is active
+  useEffect(() => {
+    if (activeModule === 'suppliers' && isAuthenticated) {
+      fetchSuppliers();
+    }
+  }, [activeModule, isAuthenticated, fetchSuppliers]);
 
 
   if (!isAuthenticated) {
@@ -254,68 +536,22 @@ function AdminDashboard() {
       
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Header - Fixed */}
-      <header className="fixed top-0 left-0 right-0 z-30 bg-slate-800/50 backdrop-blur-xl shadow-2xl border-b border-slate-700/50">
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">A</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  {t('admin.controlPanel')}
-                </h1>
-                <p className="text-xs text-slate-400">{t('admin.platformManagement')}</p>
-              </div>
+      <div className="fixed top-0 left-0 right-0 z-30">
+        <Header 
+          title={`${t('admin.controlPanel')} - ${t('admin.platformManagement')}`}
+          onMenuClick={() => setSidebarOpen(true)}
+          showMenu={true}
+          notificationComponent={
+            <AdminNotificationComponent
+              notifications={notifications}
+              onMarkAsRead={markAsRead}
+              onRemove={removeNotification}
+              onApproveSupplier={handleApproveSupplier}
+              onRejectSupplier={handleRejectSupplier}
+            />
+          }
+        />
             </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:block">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder={t('admin.searchModules')}
-                  className="pl-10 pr-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-xl text-sm text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 outline-none backdrop-blur-sm transition-all duration-200 w-64"
-                />
-              </div>
-            </div>
-
-            <button className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 relative transition-all duration-200">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse"></span>
-            </button>
-
-            {/* Language Switcher */}
-            <LanguageSwitcher />
-
-            <div className="flex items-center space-x-3 bg-slate-800/30 rounded-xl p-2 border border-slate-700/50">
-              <div className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-semibold text-white">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-emerald-400 font-medium">SUPER ADMIN</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <div className="flex pt-16">
         {/* Sidebar */}
@@ -585,13 +821,14 @@ function AdminDashboard() {
                             <h3 className="text-lg font-bold text-white mb-4">{t('admin.quickActions')}</h3>
                             <div className="space-y-3">
                               {[
-                                { icon: Plus, text: 'Add New Supplier', color: 'emerald' },
-                                { icon: Settings, text: t('admin.systemSettings'), color: 'blue' },
-                                { icon: BarChart3, text: 'View Reports', color: 'purple' },
-                                { icon: Shield, text: 'Security Audit', color: 'orange' }
+                                { icon: Plus, text: 'Add New Supplier', color: 'emerald', action: () => setShowSupplierModal(true) },
+                                { icon: Settings, text: t('admin.systemSettings'), color: 'blue', action: () => {} },
+                                { icon: BarChart3, text: 'View Reports', color: 'purple', action: () => {} },
+                                { icon: Shield, text: 'Security Audit', color: 'orange', action: () => {} }
                               ].map((action, index) => (
                                 <button
                                   key={index}
+                                  onClick={action.action}
                                   className={`w-full flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-all duration-200 group`}
                                 >
                                   <action.icon className={`w-4 h-4 text-${action.color}-400 group-hover:text-${action.color}-300`} />
@@ -615,7 +852,10 @@ function AdminDashboard() {
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">Manage isolated supplier environments and their configurations</p>
                         </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl hover:from-emerald-600 hover:to-green-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                        <button 
+                          onClick={() => setShowSupplierModal(true)}
+                          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl hover:from-emerald-600 hover:to-green-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                        >
                           <Plus className="w-5 h-5" />
                           <span className="font-semibold">Add New Supplier</span>
                         </button>
@@ -632,8 +872,8 @@ function AdminDashboard() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-medium text-slate-400">{t('admin.totalSuppliers')}</p>
-                              <p className="text-3xl font-bold text-white mt-1">156</p>
-                              <p className="text-xs text-emerald-400 mt-1">+12 this month</p>
+                              <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.total}</p>
+                              <p className="text-xs text-emerald-400 mt-1">Total registered</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <Building2 className="w-6 h-6 text-white" />
@@ -649,8 +889,8 @@ function AdminDashboard() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-medium text-slate-400">{t('admin.activeSuppliers')}</p>
-                              <p className="text-3xl font-bold text-white mt-1">142</p>
-                              <p className="text-xs text-blue-400 mt-1">91% active rate</p>
+                              <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.active}</p>
+                              <p className="text-xs text-blue-400 mt-1">{supplierStats.total > 0 ? `${Math.round((supplierStats.active / supplierStats.total) * 100)}% active rate` : '0% active rate'}</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <CheckCircle className="w-6 h-6 text-white" />
@@ -666,7 +906,7 @@ function AdminDashboard() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-medium text-slate-400">Pending Approval</p>
-                              <p className="text-3xl font-bold text-white mt-1">8</p>
+                              <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.pending}</p>
                               <p className="text-xs text-yellow-400 mt-1">Awaiting review</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -683,7 +923,7 @@ function AdminDashboard() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-medium text-slate-400">Suspended</p>
-                              <p className="text-3xl font-bold text-white mt-1">6</p>
+                              <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.suspended}</p>
                               <p className="text-xs text-red-400 mt-1">Needs attention</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -718,20 +958,36 @@ function AdminDashboard() {
                               <tr className="border-b border-slate-700/50">
                                 <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Supplier</th>
                                 <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Status</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Products</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Revenue</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Joined</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Phone</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Country</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Address</th>
                                 <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Actions</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {[
-                                { name: 'TechSupply Pro', status: 'Active', products: 1250, revenue: '$45,680', joined: '2024-01-15' },
-                                { name: 'Global Electronics', status: 'Active', products: 890, revenue: '$32,450', joined: '2024-02-03' },
-                                { name: 'Fashion Forward', status: 'Pending', products: 456, revenue: '$12,340', joined: '2024-03-10' },
-                                { name: 'Home & Garden Co', status: 'Active', products: 678, revenue: '$28,920', joined: '2024-01-28' },
-                                { name: 'Sports Central', status: 'Suspended', products: 234, revenue: '$8,760', joined: '2024-02-20' }
-                              ].map((supplier, index) => (
+                              {suppliersLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                  <tr key={index} className="border-b border-slate-700/30">
+                                    <td className="py-5 px-6" colSpan={6}>
+                                      <div className="flex items-center space-x-4">
+                                        <div className="w-12 h-12 bg-slate-700/50 rounded-xl animate-pulse"></div>
+                                        <div className="flex-1 space-y-2">
+                                          <div className="h-4 bg-slate-700/50 rounded w-1/4 animate-pulse"></div>
+                                          <div className="h-3 bg-slate-700/50 rounded w-1/6 animate-pulse"></div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : suppliers.length === 0 ? (
+                                <tr>
+                                  <td colSpan={6} className="py-12 text-center">
+                                    <Store className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                                    <p className="text-slate-400 text-lg">No suppliers found</p>
+                                    <p className="text-slate-500 text-sm mt-2">Click "Add New Supplier" to get started</p>
+                                  </td>
+                                </tr>
+                              ) : suppliers.map((supplier, index) => (
                                 <motion.tr
                                   key={index}
                                   initial={{ opacity: 0, y: 10 }}
@@ -745,51 +1001,60 @@ function AdminDashboard() {
                                         <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                                           <span className="text-white font-bold text-lg">{supplier.name[0]}</span>
                                         </div>
-                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-800"></div>
+                                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 ${supplier.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'} rounded-full border-2 border-slate-800`}></div>
                                       </div>
                                       <div>
                                         <p className="font-semibold text-white text-lg">{supplier.name}</p>
-                                        <p className="text-sm text-slate-400">ID: SUP-{String(index + 1).padStart(3, '0')}</p>
+                                        <p className="text-sm text-slate-400">{supplier.email}</p>
                                       </div>
                                     </div>
                                   </td>
                                   <td className="py-5 px-6">
                                     <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${
-                                      supplier.status === 'Active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                                      supplier.status === 'Pending' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
-                                      'bg-red-500/20 text-red-300 border border-red-500/30'
+                                      supplier.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                                      supplier.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                                      supplier.status === 'SUSPENDED' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                                      supplier.status === 'INACTIVE' ? 'bg-slate-500/20 text-slate-300 border border-slate-500/30' :
+                                      'bg-gray-500/20 text-gray-300 border border-gray-500/30'
                                     }`}>
                                       {supplier.status}
                                     </span>
                                   </td>
                                   <td className="py-5 px-6">
-                                    <span className="text-white font-semibold text-lg">{supplier.products.toLocaleString()}</span>
-                                    <span className="text-slate-400 text-sm ml-2">SKUs</span>
+                                    <span className="text-slate-400">{supplier.phone || 'N/A'}</span>
                                   </td>
                                   <td className="py-5 px-6">
-                                    <span className="text-emerald-400 font-bold text-lg">{supplier.revenue}</span>
+                                    <span className="text-slate-400">{supplier.country || 'N/A'}</span>
                                   </td>
-                                  <td className="py-5 px-6 text-slate-400">{supplier.joined}</td>
+                                  <td className="py-5 px-6">
+                                    <span className="text-slate-400">{supplier.address || 'N/A'}</span>
+                                  </td>
                                   <td className="py-5 px-6">
                                     <div className="flex items-center space-x-2">
                                       <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.95 }}
+                                        onClick={() => viewSupplier(supplier)}
                                         className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-blue-500/30"
+                                        title="View Supplier"
                                       >
                                         <Eye className="w-5 h-5" />
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.95 }}
+                                        onClick={() => openEditSupplierModal(supplier)}
                                         className="p-2 text-emerald-400 hover:bg-emerald-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-emerald-500/30"
+                                        title="Edit Supplier"
                                       >
                                         <Edit className="w-5 h-5" />
                                       </motion.button>
                                       <motion.button
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.95 }}
+                                        onClick={() => openDeleteSupplierModal(supplier)}
                                         className="p-2 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-red-500/30"
+                                        title="Delete Supplier"
                                       >
                                         <Trash2 className="w-5 h-5" />
                                       </motion.button>
@@ -814,10 +1079,6 @@ function AdminDashboard() {
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">Manage user roles, permissions, and access levels across the platform</p>
                         </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
-                          <Plus className="w-5 h-5" />
-                          <span className="font-semibold">Add New Role</span>
-                        </button>
                       </div>
 
                       {/* Role Cards */}
@@ -853,10 +1114,10 @@ function AdminDashboard() {
                         ) : (
                           // Dynamic role data
                           [
-                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: '👑', description: 'Full platform access', permissions: 'All permissions' },
-                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: '⚙️', description: 'Operational management', permissions: 'Order & Inventory' },
-                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: '🏪', description: 'Supplier operations', permissions: 'Product & Sales' },
-                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: '💼', description: 'Sales and orders', permissions: 'Orders only' }
+                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: Crown, description: 'Full platform access', permissions: 'All permissions' },
+                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: Cog, description: 'Operational management', permissions: 'Order & Inventory' },
+                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: Store, description: 'Supplier operations', permissions: 'Product & Sales' },
+                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: Briefcase, description: 'Sales and orders', permissions: 'Orders only' }
                           ].map((role, index) => {
                             const count = usersByRole[role.name.toUpperCase()] || 0;
                             return (
@@ -871,7 +1132,7 @@ function AdminDashboard() {
                             <div className="relative z-10">
                               <div className="flex items-center justify-between mb-4">
                                 <div className={`w-16 h-16 bg-gradient-to-br ${role.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                  <span className="text-3xl">{role.icon}</span>
+                                  <role.icon className="w-8 h-8 text-white" />
                                 </div>
                                 <div className="text-right">
                                   <span className="text-4xl font-bold text-white">{count}</span>
@@ -897,161 +1158,421 @@ function AdminDashboard() {
                         )}
                       </div>
 
-                      {/* Recent Users */}
-                      <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-xl font-bold text-white">Recent Users</h3>
-                          <button 
-                            onClick={() => router.push('/admin/users')}
-                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                          >
-                            View All Users
-                          </button>
-                        </div>
-                        
-                        {rbacLoading ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {Array.from({ length: 8 }).map((_, index) => (
-                              <div key={index} className="animate-pulse">
-                                <div className="flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
+                      {/* User Categories */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Admin Users */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.1 }}
+                          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl"
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center">
+                                <Crown className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold text-white">Administrators</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.ADMIN || 0} users</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => router.push('/admin/users?role=admin')}
+                              className="text-red-400 hover:text-red-300 text-sm font-medium"
+                            >
+                              View All
+                            </button>
+                          </div>
+                          
+                          {rbacLoading ? (
+                            <div className="space-y-3">
+                              {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className="animate-pulse flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
                                   <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
                                   <div className="flex-1">
-                                    <div className="w-20 h-4 bg-slate-600 rounded mb-1"></div>
+                                    <div className="w-24 h-4 bg-slate-600 rounded mb-1"></div>
                                     <div className="w-32 h-3 bg-slate-600 rounded"></div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : recentUsers.length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {recentUsers.map((user, index) => (
-                              <motion.div
-                                key={user.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200 border border-slate-600/30 hover:border-slate-500/50"
-                              >
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                  {user.firstName?.charAt(0) || 'U'}
+                        ))}
+                      </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {recentUsers.filter(user => user.role === 'ADMIN').slice(0, 5).map((user, index) => (
+                                <motion.div
+                                  key={user.id}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                                  className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200"
+                                >
+                                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {user.firstName?.charAt(0) || 'A'}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium text-sm truncate">
+                                      {user.firstName} {user.lastName}
+                                    </p>
+                                    <p className="text-slate-400 text-xs truncate">{user.email}</p>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className={`inline-block w-2 h-2 rounded-full ${
+                                        user.isActive ? 'bg-green-400' : 'bg-red-400'
+                                      }`}></span>
+                                      <span className="text-xs text-slate-500">Full Access</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ))}
+                              {recentUsers.filter(user => user.role === 'ADMIN').length === 0 && (
+                                <div className="text-center py-4 text-slate-400 text-sm">
+                                  No administrators found
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-white font-medium text-sm truncate">
-                                    {user.firstName} {user.lastName}
-                                  </p>
-                                  <p className="text-slate-400 text-xs truncate">{user.email}</p>
-                                  <div className="flex items-center space-x-2 mt-1">
-                                    <span className={`inline-block w-2 h-2 rounded-full ${
-                                      user.isActive ? 'bg-green-400' : 'bg-red-400'
-                                    }`}></span>
-                                    <span className="text-xs text-slate-500 capitalize">{user.role.toLowerCase()}</span>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+
+                        {/* Operator Users */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.2 }}
+                          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl"
+                          >
+                            <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+                                <Cog className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold text-white">Operators</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.OPERATOR || 0} users</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => router.push('/admin/users?role=operator')}
+                              className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                            >
+                              View All
+                            </button>
+                            </div>
+
+                          {rbacLoading ? (
+                            <div className="space-y-3">
+                              {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className="animate-pulse flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
+                                  <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+                                  <div className="flex-1">
+                                    <div className="w-24 h-4 bg-slate-600 rounded mb-1"></div>
+                                    <div className="w-32 h-3 bg-slate-600 rounded"></div>
                                   </div>
                                 </div>
-                              </motion.div>
-                            ))}
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {recentUsers.filter(user => user.role === 'OPERATOR').slice(0, 5).map((user, index) => (
+                                <motion.div
+                                  key={user.id}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                                  className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200"
+                                >
+                                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {user.firstName?.charAt(0) || 'O'}
+                                    </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium text-sm truncate">
+                                      {user.firstName} {user.lastName}
+                                    </p>
+                                    <p className="text-slate-400 text-xs truncate">{user.email}</p>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className={`inline-block w-2 h-2 rounded-full ${
+                                        user.isActive ? 'bg-green-400' : 'bg-red-400'
+                                      }`}></span>
+                                      <span className="text-xs text-slate-500">Operations</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ))}
+                              {recentUsers.filter(user => user.role === 'OPERATOR').length === 0 && (
+                                <div className="text-center py-4 text-slate-400 text-sm">
+                                  No operators found
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+
+                        {/* Supplier Users */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.3 }}
+                          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl"
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+                                <Store className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold text-white">Suppliers</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.SUPPLIER || 0} users</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => router.push('/admin/users?role=supplier')}
+                              className="text-emerald-400 hover:text-emerald-300 text-sm font-medium"
+                            >
+                              View All
+                            </button>
                           </div>
-                        ) : (
-                          <div className="text-center py-8 text-slate-400">
-                            No recent users found
+                          
+                          {rbacLoading ? (
+                            <div className="space-y-3">
+                              {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className="animate-pulse flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
+                                  <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+                                  <div className="flex-1">
+                                    <div className="w-24 h-4 bg-slate-600 rounded mb-1"></div>
+                                    <div className="w-32 h-3 bg-slate-600 rounded"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {recentUsers.filter(user => user.role === 'SUPPLIER').slice(0, 5).map((user, index) => (
+                                <motion.div
+                                  key={user.id}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                                  className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200"
+                                >
+                                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {user.firstName?.charAt(0) || 'S'}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium text-sm truncate">
+                                      {user.firstName} {user.lastName}
+                                    </p>
+                                    <p className="text-slate-400 text-xs truncate">{user.email}</p>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className={`inline-block w-2 h-2 rounded-full ${
+                                        user.isActive ? 'bg-green-400' : 'bg-red-400'
+                                      }`}></span>
+                                      <span className="text-xs text-slate-500">Products & Sales</span>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ))}
+                              {recentUsers.filter(user => user.role === 'SUPPLIER').length === 0 && (
+                                <div className="text-center py-4 text-slate-400 text-sm">
+                                  No suppliers found
+                            </div>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
+
+                        {/* Seller Users */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.4 }}
+                          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-xl"
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                                <Briefcase className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-bold text-white">Sellers</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.SELLER || 0} users</p>
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => router.push('/admin/users?role=seller')}
+                              className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+                            >
+                              View All
+                            </button>
                           </div>
-                        )}
+                          
+                          {rbacLoading ? (
+                            <div className="space-y-3">
+                              {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className="animate-pulse flex items-center space-x-3 p-3 bg-slate-700/50 rounded-xl">
+                                  <div className="w-10 h-10 bg-slate-600 rounded-full"></div>
+                                  <div className="flex-1">
+                                    <div className="w-24 h-4 bg-slate-600 rounded mb-1"></div>
+                                    <div className="w-32 h-3 bg-slate-600 rounded"></div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {recentUsers.filter(user => user.role === 'SELLER').slice(0, 5).map((user, index) => (
+                                <motion.div
+                                  key={user.id}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                                  className="flex items-center space-x-3 p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-xl transition-colors duration-200"
+                                >
+                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {user.firstName?.charAt(0) || 'S'}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-white font-medium text-sm truncate">
+                                      {user.firstName} {user.lastName}
+                                    </p>
+                                    <p className="text-slate-400 text-xs truncate">{user.email}</p>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                      <span className={`inline-block w-2 h-2 rounded-full ${
+                                        user.isActive ? 'bg-green-400' : 'bg-red-400'
+                                      }`}></span>
+                                      <span className="text-xs text-slate-500">Orders Only</span>
+                                    </div>
+                                  </div>
+                          </motion.div>
+                        ))}
+                              {recentUsers.filter(user => user.role === 'SELLER').length === 0 && (
+                                <div className="text-center py-4 text-slate-400 text-sm">
+                                  No sellers found
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </motion.div>
                       </div>
 
                       {/* Permission Matrix */}
-                      <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-xl font-bold text-white">Permission Matrix</h3>
-                          <button 
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="bg-slate-800/50 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl"
+                      >
+                        <div className="flex items-center justify-between mb-8">
+                          <div>
+                            <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                              Permission Matrix
+                            </h3>
+                            <p className="text-slate-400 mt-2">
+                              Overview of role-based access permissions
+                            </p>
+                          </div>
+                          <button
                             onClick={() => router.push('/admin/permissions')}
-                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
                           >
-                            Manage Permissions
+                            <Shield className="w-5 h-5" />
+                            <span>Manage Permissions</span>
                           </button>
                         </div>
-                        
+
                         {rbacLoading ? (
-                          <div className="animate-pulse">
-                            <div className="overflow-x-auto">
-                              <table className="w-full">
-                                <thead>
-                                  <tr className="border-b border-slate-700/50">
-                                    <th className="text-left py-4 px-6">
-                                      <div className="w-24 h-4 bg-slate-700 rounded"></div>
-                                    </th>
-                                    <th className="text-center py-4 px-6">
-                                      <div className="w-16 h-4 bg-slate-700 rounded mx-auto"></div>
-                                    </th>
-                                    <th className="text-center py-4 px-6">
-                                      <div className="w-20 h-4 bg-slate-700 rounded mx-auto"></div>
-                                    </th>
-                                    <th className="text-center py-4 px-6">
-                                      <div className="w-18 h-4 bg-slate-700 rounded mx-auto"></div>
-                                    </th>
-                                    <th className="text-center py-4 px-6">
-                                      <div className="w-14 h-4 bg-slate-700 rounded mx-auto"></div>
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {Array.from({ length: 5 }).map((_, index) => (
-                                    <tr key={index} className="border-b border-slate-700/30">
-                                      <td className="py-4 px-6">
-                                        <div className="w-32 h-4 bg-slate-700 rounded"></div>
-                                      </td>
-                                      {Array.from({ length: 4 }).map((_, i) => (
-                                        <td key={i} className="py-4 px-6 text-center">
-                                          <div className="w-5 h-5 bg-slate-700 rounded-full mx-auto"></div>
-                                        </td>
-                                      ))}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        ) : permissionMatrix.length > 0 ? (
-                          <div className="overflow-x-auto">
-                            <table className="w-full">
-                              <thead>
-                                <tr className="border-b border-slate-700/50">
-                                  <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm">Permission</th>
-                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Admin</th>
-                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Operator</th>
-                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Supplier</th>
-                                  <th className="text-center py-4 px-6 font-semibold text-slate-300 text-sm">Seller</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {permissionMatrix.map((perm, index) => (
-                                  <motion.tr
-                                    key={perm.id || index}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                                    className="border-b border-slate-700/30 hover:bg-slate-700/20"
-                                  >
-                                    <td className="py-4 px-6 text-white font-medium">{perm.name}</td>
-                                    {['ADMIN', 'OPERATOR', 'SUPPLIER', 'SELLER'].map((role) => (
-                                      <td key={role} className="py-4 px-6 text-center">
-                                        {perm.roles && perm.roles[role] ? (
-                                          <CheckCircle className="w-5 h-5 text-emerald-400 mx-auto" />
-                                        ) : (
-                                          <X className="w-5 h-5 text-slate-600 mx-auto" />
-                                        )}
-                                      </td>
-                                    ))}
-                                  </motion.tr>
-                                ))}
-                              </tbody>
-                            </table>
+                          <div className="text-center py-12">
+                            <RefreshCw className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-4" />
+                            <p className="text-slate-400">Loading permissions...</p>
                           </div>
                         ) : (
-                          <div className="text-center py-8 text-slate-400">
-                            No permission data available
-                          </div>
-                        )}
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-slate-700">
+                                  <th className="text-left py-4 px-4 text-slate-300 font-semibold">Permission</th>
+                                  <th className="text-center py-4 px-4 text-slate-300 font-semibold">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <Crown className="w-4 h-4 text-red-400" />
+                                      <span>Admin</span>
+                                    </div>
+                                  </th>
+                                  <th className="text-center py-4 px-4 text-slate-300 font-semibold">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <Cog className="w-4 h-4 text-blue-400" />
+                                      <span>Operator</span>
+                                    </div>
+                                  </th>
+                                  <th className="text-center py-4 px-4 text-slate-300 font-semibold">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <Store className="w-4 h-4 text-emerald-400" />
+                                      <span>Supplier</span>
+                                    </div>
+                                  </th>
+                                  <th className="text-center py-4 px-4 text-slate-300 font-semibold">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <Briefcase className="w-4 h-4 text-purple-400" />
+                                      <span>Seller</span>
+                                    </div>
+                                  </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                {permissionMatrix.map((permission, index) => (
+                                <motion.tr
+                                    key={permission.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                                    className="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors duration-200"
+                                  >
+                                    <td className="py-4 px-4">
+                                      <div>
+                                        <p className="text-white font-medium">{permission.name}</p>
+                                        <p className="text-slate-400 text-xs mt-1 capitalize">{permission.category}</p>
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                      {matrixData.ADMIN?.[permission.id] ? (
+                                        <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                                      ) : (
+                                        <XCircle className="w-5 h-5 text-slate-600 mx-auto" />
+                                      )}
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                      {matrixData.OPERATOR?.[permission.id] ? (
+                                        <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                                      ) : (
+                                        <XCircle className="w-5 h-5 text-slate-600 mx-auto" />
+                                      )}
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                      {matrixData.SUPPLIER?.[permission.id] ? (
+                                        <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                                      ) : (
+                                        <XCircle className="w-5 h-5 text-slate-600 mx-auto" />
+                                      )}
+                                    </td>
+                                    <td className="py-4 px-4 text-center">
+                                      {matrixData.SELLER?.[permission.id] ? (
+                                        <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                                      ) : (
+                                        <XCircle className="w-5 h-5 text-slate-600 mx-auto" />
+                                      )}
+                                    </td>
+                                </motion.tr>
+                              ))}
+                            </tbody>
+                          </table>
+
+                            {permissionMatrix.length === 0 && (
+                              <div className="text-center py-12">
+                                <Shield className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                                <p className="text-slate-400">No permissions found</p>
+                        </div>
+                            )}
                       </div>
+                        )}
+                      </motion.div>
+
                     </div>
                   )}
 
@@ -1076,10 +1597,10 @@ function AdminDashboard() {
                         <h3 className="text-2xl font-bold text-white mb-8">Order Status Pipeline</h3>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                           {[
-                            { status: 'To Pick', count: 45, color: 'from-yellow-500 to-orange-600', icon: Clock },
-                            { status: 'Picking', count: 12, color: 'from-blue-500 to-cyan-600', icon: Package },
-                            { status: 'Packed', count: 23, color: 'from-emerald-500 to-green-600', icon: CheckCircle },
-                            { status: 'Shipped', count: 156, color: 'from-purple-500 to-pink-600', icon: Truck }
+                            { status: 'To Pick', count: 45, color: 'from-yellow-500 to-orange-600', icon: Clock, description: 'Orders ready for picking' },
+                            { status: 'Picking', count: 12, color: 'from-blue-500 to-cyan-600', icon: Package, description: 'Currently being picked' },
+                            { status: 'Packed', count: 23, color: 'from-emerald-500 to-green-600', icon: CheckCircle, description: 'Ready for shipment' },
+                            { status: 'Shipped', count: 156, color: 'from-purple-500 to-pink-600', icon: Truck, description: 'Out for delivery' }
                           ].map((stage, index) => (
                             <motion.div
                               key={index}
@@ -1180,12 +1701,12 @@ function AdminDashboard() {
                       {/* Marketplace Cards */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[
-                          { name: 'Shopee', status: 'Connected', products: 1250, orders: 456, revenue: '$45,680', icon: '🛍️', color: 'from-orange-500 to-red-600' },
-                          { name: 'Mercado Livre', status: 'Connected', products: 890, orders: 234, revenue: '$32,450', icon: '💛', color: 'from-yellow-500 to-orange-600' },
-                          { name: 'TikTok Shop', status: 'Connected', products: 678, orders: 189, revenue: '$28,920', icon: '🎵', color: 'from-pink-500 to-purple-600' },
-                          { name: 'Kwai Shop', status: 'Pending', products: 456, orders: 67, revenue: '$12,340', icon: '📱', color: 'from-purple-500 to-indigo-600' },
-                          { name: 'Amazon', status: 'Connected', products: 234, orders: 123, revenue: '$18,760', icon: '📦', color: 'from-blue-500 to-cyan-600' },
-                          { name: 'Magalu', status: 'Connected', products: 567, orders: 198, revenue: '$22,890', icon: '🏬', color: 'from-red-500 to-pink-600' }
+                          { name: 'Shopee', status: 'Connected', products: 1250, orders: 456, revenue: '$45,680', icon: ShoppingCart, color: 'from-orange-500 to-red-600' },
+                          { name: 'Mercado Livre', status: 'Connected', products: 890, orders: 234, revenue: '$32,450', icon: Heart, color: 'from-yellow-500 to-orange-600' },
+                          { name: 'TikTok Shop', status: 'Connected', products: 678, orders: 189, revenue: '$28,920', icon: Music, color: 'from-pink-500 to-purple-600' },
+                          { name: 'Kwai Shop', status: 'Pending', products: 456, orders: 67, revenue: '$12,340', icon: Smartphone, color: 'from-purple-500 to-indigo-600' },
+                          { name: 'Amazon', status: 'Connected', products: 234, orders: 123, revenue: '$18,760', icon: Package, color: 'from-blue-500 to-cyan-600' },
+                          { name: 'Magalu', status: 'Connected', products: 567, orders: 198, revenue: '$22,890', icon: Building2, color: 'from-red-500 to-pink-600' }
                         ].map((marketplace, index) => (
                           <motion.div
                             key={index}
@@ -1197,7 +1718,7 @@ function AdminDashboard() {
                             <div className="relative z-10">
                               <div className="flex items-center justify-between mb-4">
                                 <div className={`w-14 h-14 bg-gradient-to-br ${marketplace.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                  <span className="text-3xl">{marketplace.icon}</span>
+                                  <marketplace.icon className="w-7 h-7 text-white" />
                                 </div>
                                 <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${
                                   marketplace.status === 'Connected' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
@@ -1446,7 +1967,10 @@ function AdminDashboard() {
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">Manage product catalogs, inventory, and stock synchronization across all suppliers</p>
                         </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
+                        <button 
+                          onClick={() => showInfo('Add Product', 'Product management functionality is coming soon. You will be able to add, edit, and manage products from this section.')}
+                          className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                        >
                           <Plus className="w-5 h-5" />
                           <span className="font-semibold">Add Product</span>
                         </button>
@@ -3114,6 +3638,514 @@ function AdminDashboard() {
           </main>
         </div>
       </div>
+
+      {/* Add Supplier Modal */}
+      {showSupplierModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowSupplierModal(false);
+            }
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 max-w-3xl w-full mx-4 border border-slate-700/50 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
+                  <Store className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Add New Supplier</h2>
+              </div>
+              <button
+                onClick={() => setShowSupplierModal(false)}
+                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSupplier} className="space-y-6">
+              {/* Company Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <Building2 className="w-5 h-5 text-emerald-400" />
+                  <span>Company Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.companyName}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, companyName: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="Enter company name"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Contact Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.contactName}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, contactName: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="Enter contact name"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <User className="w-5 h-5 text-emerald-400" />
+                  <span>Contact Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      value={newSupplier.email}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="supplier@example.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      value={newSupplier.phone}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="+1 (555) 123-4567"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <MapPin className="w-5 h-5 text-emerald-400" />
+                  <span>Address Information</span>
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Street Address *
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.address}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, address: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="123 Main Street"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        City *
+                      </label>
+                      <input
+                        type="text"
+                        value={newSupplier.city}
+                        onChange={(e) => setNewSupplier({ ...newSupplier, city: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                        placeholder="New York"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        Country *
+                      </label>
+                      <input
+                        type="text"
+                        value={newSupplier.country}
+                        onChange={(e) => setNewSupplier({ ...newSupplier, country: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                        placeholder="United States"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-emerald-400" />
+                  <span>Additional Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Tax ID / VAT Number
+                    </label>
+                    <input
+                      type="text"
+                      value={newSupplier.taxId}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, taxId: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="123-45-6789"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Website
+                    </label>
+                    <input
+                      type="url"
+                      value={newSupplier.website}
+                      onChange={(e) => setNewSupplier({ ...newSupplier, website: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-3 pt-4 border-t border-slate-700/50">
+                <button
+                  type="button"
+                  onClick={() => setShowSupplierModal(false)}
+                  className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Add Supplier</span>
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Edit Supplier Modal */}
+      {showEditSupplierModal && selectedSupplier && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowEditSupplierModal(false);
+            }
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 max-w-3xl w-full mx-4 border border-slate-700/50 shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Edit className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Edit Supplier</h2>
+              </div>
+              <button
+                onClick={() => setShowEditSupplierModal(false)}
+                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSupplier} className="space-y-6">
+              {/* Company Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <Building2 className="w-5 h-5 text-blue-400" />
+                  <span>Company Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Company Name *</label>
+                    <input
+                      type="text"
+                      value={editSupplier.name || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, name: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="Enter company name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Email Address *</label>
+                    <input
+                      type="email"
+                      value={editSupplier.email || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, email: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="company@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <UserCheck className="w-5 h-5 text-green-400" />
+                  <span>Contact Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Contact Name</label>
+                    <input
+                      type="text"
+                      value={editSupplier.contactName || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, contactName: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="Contact person name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>
+                    <input
+                      type="tel"
+                      value={editSupplier.phone || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, phone: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <MapPin className="w-5 h-5 text-purple-400" />
+                  <span>Address Information</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Address</label>
+                    <input
+                      type="text"
+                      value={editSupplier.address || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, address: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="Street address"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">City</label>
+                    <input
+                      type="text"
+                      value={editSupplier.city || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, city: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="City name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Country</label>
+                    <input
+                      type="text"
+                      value={editSupplier.country || ''}
+                      onChange={(e) => setEditSupplier({...editSupplier, country: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      placeholder="Country name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                    <div className="relative status-dropdown">
+                      <button
+                        type="button"
+                        onClick={() => setShowStatusDropdown(!showStatusDropdown)}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-slate-700/50 to-slate-600/50 border border-slate-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 cursor-pointer hover:from-slate-600/50 hover:to-slate-500/50 hover:border-slate-500/50 shadow-lg hover:shadow-xl flex items-center justify-between group"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            editSupplier.status === 'ACTIVE' ? 'bg-emerald-500 shadow-emerald-500/50 shadow-lg' :
+                            editSupplier.status === 'PENDING' ? 'bg-yellow-500 shadow-yellow-500/50 shadow-lg' :
+                            editSupplier.status === 'SUSPENDED' ? 'bg-red-500 shadow-red-500/50 shadow-lg' :
+                            editSupplier.status === 'INACTIVE' ? 'bg-slate-500 shadow-slate-500/50 shadow-lg' :
+                            'bg-emerald-500 shadow-emerald-500/50 shadow-lg'
+                          }`}></div>
+                          <span className="font-medium">
+                            {editSupplier.status === 'ACTIVE' ? 'Active' :
+                             editSupplier.status === 'PENDING' ? 'Pending' :
+                             editSupplier.status === 'SUSPENDED' ? 'Suspended' :
+                             editSupplier.status === 'INACTIVE' ? 'Inactive' :
+                             'Active'}
+                          </span>
+                        </div>
+                        <svg className={`w-5 h-5 text-slate-400 transition-all duration-300 ${showStatusDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Custom Dropdown */}
+                      <AnimatePresence>
+                        {showStatusDropdown && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-xl shadow-2xl z-50 overflow-hidden"
+                          >
+                            {[
+                              { value: 'ACTIVE', label: 'Active', color: 'emerald', icon: '✓' },
+                              { value: 'PENDING', label: 'Pending', color: 'yellow', icon: '⏳' },
+                              { value: 'SUSPENDED', label: 'Suspended', color: 'red', icon: '⛔' },
+                              { value: 'INACTIVE', label: 'Inactive', color: 'slate', icon: '⏸️' }
+                            ].map((option, index) => (
+                              <motion.button
+                                key={option.value}
+                                type="button"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                onClick={() => {
+                                  setEditSupplier({...editSupplier, status: option.value});
+                                  setShowStatusDropdown(false);
+                                }}
+                                className={`w-full px-4 py-3 flex items-center space-x-3 text-left transition-all duration-200 hover:bg-slate-700/50 ${
+                                  editSupplier.status === option.value ? 'bg-slate-700/30' : ''
+                                }`}
+                              >
+                                <div className={`w-3 h-3 rounded-full bg-${option.color}-500 shadow-lg shadow-${option.color}-500/50`}></div>
+                                <span className="text-lg">{option.icon}</span>
+                                <span className="text-white font-medium">{option.label}</span>
+                                {editSupplier.status === option.value && (
+                                  <div className="ml-auto">
+                                    <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </motion.button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-3 pt-4 border-t border-slate-700/50">
+                <button
+                  type="button"
+                  onClick={() => setShowEditSupplierModal(false)}
+                  className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Edit className="w-5 h-5" />
+                  <span>Update Supplier</span>
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Supplier Modal */}
+      {showDeleteSupplierModal && selectedSupplier && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteSupplierModal(false);
+            }
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 max-w-md w-full mx-4 border border-slate-700/50 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trash2 className="w-8 h-8 text-white" />
+              </div>
+              
+              <h2 className="text-2xl font-bold text-white mb-4">Delete Supplier</h2>
+              <p className="text-slate-300 mb-6">
+                Are you sure you want to delete <span className="font-semibold text-white">{selectedSupplier.name}</span>? 
+                This action cannot be undone and will permanently remove all supplier data.
+              </p>
+              
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowDeleteSupplierModal(false)}
+                  className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSupplier}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertState.isOpen}
+        type={alertState.type}
+        title={alertState.title}
+        message={alertState.message}
+        confirmText={alertState.confirmText}
+        onClose={closeAlert}
+      />
     </div>
     </>
   );

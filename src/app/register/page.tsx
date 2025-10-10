@@ -507,15 +507,16 @@ export default function RegisterPage() {
 
 
 
-                      {/* Email Sign In */}
+                      {/* Register as Supplier */}
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="button"
-                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gray-700/50 text-sm font-medium text-gray-200 hover:bg-gray-600/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors"
+                        onClick={() => router.push('/register/supplier')}
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gradient-to-r from-emerald-600/20 to-green-600/20 text-sm font-medium text-emerald-300 hover:from-emerald-600/30 hover:to-green-600/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer transition-all duration-200 border-emerald-500/30 hover:border-emerald-400/50"
                       >
-                        <Mail className="w-5 h-5 mr-3 text-gray-400" />
-                         {t('auth.signInWithEmail')}
+                        <Package className="w-5 h-5 mr-3 text-emerald-400" />
+                        Register as Supplier
                       </motion.button>
                     </div>
                   </motion.div>
