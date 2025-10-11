@@ -876,7 +876,7 @@ function AdminDashboard() {
                             <div>
                               <p className="text-sm font-medium text-slate-400">{t('admin.totalSuppliers')}</p>
                               <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.total}</p>
-                              <p className="text-xs text-emerald-400 mt-1">Total registered</p>
+                              <p className="text-xs text-emerald-400 mt-1">{t('admin.totalRegistered')}</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <Building2 className="w-6 h-6 text-white" />
@@ -893,7 +893,7 @@ function AdminDashboard() {
                             <div>
                               <p className="text-sm font-medium text-slate-400">{t('admin.activeSuppliers')}</p>
                               <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.active}</p>
-                              <p className="text-xs text-blue-400 mt-1">{supplierStats.total > 0 ? `${Math.round((supplierStats.active / supplierStats.total) * 100)}% active rate` : '0% active rate'}</p>
+                              <p className="text-xs text-blue-400 mt-1">{supplierStats.total > 0 ? `${Math.round((supplierStats.active / supplierStats.total) * 100)}% ${t('admin.activeRate')}` : `0% ${t('admin.activeRate')}`}</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <CheckCircle className="w-6 h-6 text-white" />
@@ -925,9 +925,9 @@ function AdminDashboard() {
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-slate-400">Suspended</p>
+                              <p className="text-sm font-medium text-slate-400">{t('admin.suspended')}</p>
                               <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.suspended}</p>
-                              <p className="text-xs text-red-400 mt-1">Needs attention</p>
+                              <p className="text-xs text-red-400 mt-1">{t('admin.needsAttention')}</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <AlertCircle className="w-6 h-6 text-white" />
@@ -939,7 +939,7 @@ function AdminDashboard() {
                       {/* Suppliers Table */}
                       <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
                         <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-xl font-bold text-white">Supplier Directory</h3>
+                          <h3 className="text-xl font-bold text-white">{t('admin.supplierDirectory')}</h3>
                           <div className="flex items-center space-x-4">
                             <div className="relative">
                               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -986,7 +986,7 @@ function AdminDashboard() {
                                 <tr>
                                   <td colSpan={6} className="py-12 text-center">
                                     <Store className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                                    <p className="text-slate-400 text-lg">No suppliers found</p>
+                                    <p className="text-slate-400 text-lg">{t('admin.noSuppliersFound')}</p>
                                     <p className="text-slate-500 text-sm mt-2">Suppliers will appear here when they register</p>
                                   </td>
                                 </tr>
@@ -1080,7 +1080,7 @@ function AdminDashboard() {
                           <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                             Role-Based Access Control
                           </h2>
-                          <p className="text-slate-400 mt-2 text-lg">Manage user roles, permissions, and access levels across the platform</p>
+                          <p className="text-slate-400 mt-2 text-lg">{t('admin.manageUserRolesDescription')}</p>
                         </div>
                       </div>
 
@@ -1117,10 +1117,10 @@ function AdminDashboard() {
                         ) : (
                           // Dynamic role data
                           [
-                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: Crown, description: 'Full platform access', permissions: 'All permissions' },
-                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: Cog, description: 'Operational management', permissions: 'Order & Inventory' },
-                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: Store, description: 'Supplier operations', permissions: 'Product & Sales' },
-                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: Briefcase, description: 'Sales and orders', permissions: 'Orders only' }
+                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: Crown, description: t('admin.fullPlatformAccess'), permissions: t('admin.allPermissions') },
+                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: Cog, description: t('admin.operationalManagement'), permissions: t('admin.orderInventory') },
+                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: Store, description: t('admin.supplierOperations'), permissions: t('admin.productSales') },
+                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: Briefcase, description: t('admin.salesAndOrders'), permissions: t('admin.ordersOnly') }
                           ].map((role, index) => {
                             const count = usersByRole[role.name.toUpperCase()] || 0;
                             return (
@@ -1152,7 +1152,7 @@ function AdminDashboard() {
                                 onClick={() => router.push(`/admin/permissions?role=${role.name.toLowerCase()}`)}
                                 className="w-full py-2.5 text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-purple-500/50"
                               >
-                                Manage Permissions
+                                {t('admin.managePermissions')}
                               </button>
                             </div>
                           </motion.div>
@@ -1184,7 +1184,7 @@ function AdminDashboard() {
                               onClick={() => router.push('/admin/users?role=admin')}
                               className="text-red-400 hover:text-red-300 text-sm font-medium"
                             >
-                              View All
+                              {t('admin.viewAll')}
                             </button>
                           </div>
                           
@@ -1222,7 +1222,7 @@ function AdminDashboard() {
                                       <span className={`inline-block w-2 h-2 rounded-full ${
                                         user.isActive ? 'bg-green-400' : 'bg-red-400'
                                       }`}></span>
-                                      <span className="text-xs text-slate-500">Full Access</span>
+                                      <span className="text-xs text-slate-500">{t('admin.fullAccess')}</span>
                                     </div>
                                   </div>
                                 </motion.div>
@@ -1257,7 +1257,7 @@ function AdminDashboard() {
                               onClick={() => router.push('/admin/users?role=operator')}
                               className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                             >
-                              View All
+                              {t('admin.viewAll')}
                             </button>
                             </div>
 
@@ -1295,7 +1295,7 @@ function AdminDashboard() {
                                       <span className={`inline-block w-2 h-2 rounded-full ${
                                         user.isActive ? 'bg-green-400' : 'bg-red-400'
                                       }`}></span>
-                                      <span className="text-xs text-slate-500">Operations</span>
+                                      <span className="text-xs text-slate-500">{t('admin.operations')}</span>
                                     </div>
                                   </div>
                                 </motion.div>
@@ -1330,7 +1330,7 @@ function AdminDashboard() {
                               onClick={() => router.push('/admin/users?role=supplier')}
                               className="text-emerald-400 hover:text-emerald-300 text-sm font-medium"
                             >
-                              View All
+                              {t('admin.viewAll')}
                             </button>
                           </div>
                           
@@ -1368,7 +1368,7 @@ function AdminDashboard() {
                                       <span className={`inline-block w-2 h-2 rounded-full ${
                                         user.isActive ? 'bg-green-400' : 'bg-red-400'
                                       }`}></span>
-                                      <span className="text-xs text-slate-500">Products & Sales</span>
+                                      <span className="text-xs text-slate-500">{t('admin.productsSales')}</span>
                                     </div>
                                   </div>
                                 </motion.div>
@@ -1403,7 +1403,7 @@ function AdminDashboard() {
                               onClick={() => router.push('/admin/users?role=seller')}
                               className="text-purple-400 hover:text-purple-300 text-sm font-medium"
                             >
-                              View All
+                              {t('admin.viewAll')}
                             </button>
                           </div>
                           
@@ -1441,7 +1441,7 @@ function AdminDashboard() {
                                       <span className={`inline-block w-2 h-2 rounded-full ${
                                         user.isActive ? 'bg-green-400' : 'bg-red-400'
                                       }`}></span>
-                                      <span className="text-xs text-slate-500">Orders Only</span>
+                                      <span className="text-xs text-slate-500">{t('admin.ordersOnlyAccess')}</span>
                                     </div>
                                   </div>
                           </motion.div>
@@ -1466,10 +1466,10 @@ function AdminDashboard() {
                         <div className="flex items-center justify-between mb-8">
                           <div>
                             <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                              Permission Matrix
+                              {t('admin.permissionMatrix')}
                             </h3>
                             <p className="text-slate-400 mt-2">
-                              Overview of role-based access permissions
+                              {t('admin.overviewRoleBasedPermissions')}
                             </p>
                           </div>
                           <button
@@ -1477,7 +1477,7 @@ function AdminDashboard() {
                             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
                           >
                             <Shield className="w-5 h-5" />
-                            <span>Manage Permissions</span>
+                            <span>{t('admin.managePermissions')}</span>
                           </button>
                         </div>
 

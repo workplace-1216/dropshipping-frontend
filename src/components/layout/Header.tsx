@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { LogOut, User, Bell, Menu } from 'lucide-react';
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   notificationComponent
 }) => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -34,6 +36,11 @@ export const Header: React.FC<HeaderProps> = ({
     } catch (error) {
       console.error('Logout error:', error);
     }
+  };
+
+  // Translate user role
+  const translateRole = (role: string) => {
+    return t(`role.${role.toLowerCase()}`) || role;
   };
 
   return (
@@ -78,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <p className="text-sm font-medium text-white">
                     {user.firstName} {user.lastName}
                   </p>
-                  <p className="text-xs text-slate-400">{user.role}</p>
+                  <p className="text-xs text-slate-400">{translateRole(user.role)}</p>
                 </div>
                 <button
                   onClick={handleLogout}
