@@ -1078,7 +1078,7 @@ function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Role-Based Access Control
+                            {t('admin.roleBasedAccessControl')}
                           </h2>
                           <p className="text-slate-400 mt-2 text-lg">{t('admin.manageUserRolesDescription')}</p>
                         </div>
@@ -1117,10 +1117,10 @@ function AdminDashboard() {
                         ) : (
                           // Dynamic role data
                           [
-                            { name: 'Admin', color: 'from-red-500 to-pink-600', icon: Crown, description: t('admin.fullPlatformAccess'), permissions: t('admin.allPermissions') },
-                            { name: 'Operator', color: 'from-blue-500 to-cyan-600', icon: Cog, description: t('admin.operationalManagement'), permissions: t('admin.orderInventory') },
-                            { name: 'Supplier', color: 'from-emerald-500 to-green-600', icon: Store, description: t('admin.supplierOperations'), permissions: t('admin.productSales') },
-                            { name: 'Seller', color: 'from-purple-500 to-indigo-600', icon: Briefcase, description: t('admin.salesAndOrders'), permissions: t('admin.ordersOnly') }
+                            { name: t('admin.admin'), color: 'from-red-500 to-pink-600', icon: Crown, description: t('admin.fullPlatformAccess'), permissions: t('admin.allPermissions') },
+                            { name: t('admin.operators'), color: 'from-blue-500 to-cyan-600', icon: Cog, description: t('admin.operationalManagement'), permissions: t('admin.orderInventory') },
+                            { name: t('admin.suppliers'), color: 'from-emerald-500 to-green-600', icon: Store, description: t('admin.supplierOperations'), permissions: t('admin.productSales') },
+                            { name: t('admin.sellers'), color: 'from-purple-500 to-indigo-600', icon: Briefcase, description: t('admin.salesAndOrders'), permissions: t('admin.ordersOnly') }
                           ].map((role, index) => {
                             const count = usersByRole[role.name.toUpperCase()] || 0;
                             return (
@@ -1139,7 +1139,7 @@ function AdminDashboard() {
                                 </div>
                                 <div className="text-right">
                                   <span className="text-4xl font-bold text-white">{count}</span>
-                                  <p className="text-xs text-slate-400 mt-1">users</p>
+                                  <p className="text-xs text-slate-400 mt-1">{t('admin.users')}</p>
                                 </div>
                               </div>
                               <h3 className="text-xl font-bold text-white mb-2">{role.name}</h3>
@@ -1176,8 +1176,8 @@ function AdminDashboard() {
                                 <Crown className="w-5 h-5 text-white" />
                               </div>
                               <div>
-                                <h3 className="text-lg font-bold text-white">Administrators</h3>
-                                <p className="text-slate-400 text-sm">{usersByRole.ADMIN || 0} users</p>
+                                <h3 className="text-lg font-bold text-white">{t('admin.administrators')}</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.ADMIN || 0} {t('admin.users')}</p>
                               </div>
                             </div>
                             <button 
@@ -1249,8 +1249,8 @@ function AdminDashboard() {
                                 <Cog className="w-5 h-5 text-white" />
                               </div>
                               <div>
-                                <h3 className="text-lg font-bold text-white">Operators</h3>
-                                <p className="text-slate-400 text-sm">{usersByRole.OPERATOR || 0} users</p>
+                                <h3 className="text-lg font-bold text-white">{t('admin.operators')}</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.OPERATOR || 0} {t('admin.users')}</p>
                               </div>
                             </div>
                             <button 
@@ -1322,8 +1322,8 @@ function AdminDashboard() {
                                 <Store className="w-5 h-5 text-white" />
                               </div>
                               <div>
-                                <h3 className="text-lg font-bold text-white">Suppliers</h3>
-                                <p className="text-slate-400 text-sm">{usersByRole.SUPPLIER || 0} users</p>
+                                <h3 className="text-lg font-bold text-white">{t('admin.suppliers')}</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.SUPPLIER || 0} {t('admin.users')}</p>
                               </div>
                             </div>
                             <button 
@@ -1395,8 +1395,8 @@ function AdminDashboard() {
                                 <Briefcase className="w-5 h-5 text-white" />
                               </div>
                               <div>
-                                <h3 className="text-lg font-bold text-white">Sellers</h3>
-                                <p className="text-slate-400 text-sm">{usersByRole.SELLER || 0} users</p>
+                                <h3 className="text-lg font-bold text-white">{t('admin.sellers')}</h3>
+                                <p className="text-slate-400 text-sm">{usersByRole.SELLER || 0} {t('admin.users')}</p>
                               </div>
                             </div>
                             <button 
@@ -1761,12 +1761,12 @@ function AdminDashboard() {
                       {/* API Management */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">OAuth/API Key Management</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.oauthApiKeyManagement')}</h3>
                           <div className="space-y-4">
                             {[
-                              { name: 'Shopee API', status: 'Active', lastSync: '2 minutes ago' },
-                              { name: 'Mercado Livre API', status: 'Active', lastSync: '5 minutes ago' },
-                              { name: 'TikTok Shop API', status: 'Pending', lastSync: 'Awaiting approval' }
+                              { name: t('admin.shopeeApi'), status: t('admin.active'), lastSync: `2 ${t('admin.minutesAgo')}` },
+                              { name: t('admin.mercadoLivreApi'), status: t('admin.active'), lastSync: `5 ${t('admin.minutesAgo')}` },
+                              { name: t('admin.tikTokShopApi'), status: t('admin.pending'), lastSync: t('admin.awaitingApproval') }
                             ].map((api, index) => (
                               <motion.div
                                 key={index}
@@ -1792,13 +1792,13 @@ function AdminDashboard() {
                         </div>
 
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">Sync Performance</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.syncPerformance')}</h3>
                           <div className="space-y-5">
                             {[
-                              { label: 'Product Sync Rate', value: '99.2%', color: 'emerald' },
-                              { label: 'Stock Sync Rate', value: '98.8%', color: 'blue' },
-                              { label: 'Order Sync Rate', value: '99.5%', color: 'purple' },
-                              { label: 'Average Sync Time', value: '2.3s', color: 'cyan' }
+                              { label: t('admin.productSyncRate'), value: '99.2%', color: 'emerald' },
+                              { label: t('admin.stockSyncRate'), value: '98.8%', color: 'blue' },
+                              { label: t('admin.orderSyncRate'), value: '99.5%', color: 'purple' },
+                              { label: t('admin.averageSyncTime'), value: '2.3s', color: 'cyan' }
                             ].map((metric, index) => (
                               <motion.div
                                 key={index}
