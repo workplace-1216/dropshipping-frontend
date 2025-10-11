@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/Header';
 import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { AdminNotificationComponent, useAdminNotifications, AdminNotification } from '@/components/ui/AdminNotification';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AdminCharts } from '@/components/admin/AdminCharts';
 import { 
   Package, 
   ShoppingCart, 
@@ -750,6 +751,15 @@ function AdminDashboard() {
                           );
                         })}
                       </div>
+
+                      {/* Charts and Analytics Section */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                      >
+                        <AdminCharts />
+                      </motion.div>
 
                       {/* Real-time Activity Dashboard */}
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
