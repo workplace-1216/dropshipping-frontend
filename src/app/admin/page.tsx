@@ -102,10 +102,10 @@ function AdminDashboard() {
         supplierId: supplier.id,
         supplierData: supplier,
       });
-      showSuccess('Supplier Approved', 'The supplier has been approved and can now access the platform.');
+      showSuccess(t('admin.supplierApproved'), t('admin.supplierApprovedMessage'));
     } catch (error) {
       console.error('Error approving supplier:', error);
-      showError('Approval Failed', 'Failed to approve the supplier. Please try again.');
+      showError(t('admin.approvalFailed'), t('admin.approvalFailedMessage'));
     }
   };
 
@@ -116,10 +116,10 @@ function AdminDashboard() {
         supplierId: supplier.id,
         supplierData: supplier,
       });
-      showSuccess('Supplier Rejected', 'The supplier has been rejected and will be notified.');
+      showSuccess(t('admin.supplierRejected'), t('admin.supplierRejectedMessage'));
     } catch (error) {
       console.error('Error rejecting supplier:', error);
-      showError('Rejection Failed', 'Failed to reject the supplier. Please try again.');
+      showError(t('admin.rejectionFailed'), t('admin.rejectionFailedMessage'));
     }
   };
   
@@ -316,14 +316,14 @@ function AdminDashboard() {
       await fetchSuppliers();
       
       showSuccess(
-        'Supplier Added Successfully!',
-        `${supplierName} has been added to the system.`
+        t('admin.supplierAdded'),
+        `${supplierName} ${t('admin.supplierAddedMessage')}`
       );
     } catch (error) {
       console.error('Error creating supplier:', error);
       showError(
-        'Failed to Add Supplier',
-        'There was an error creating the supplier. Please check the information and try again.'
+        t('admin.supplierAddFailed'),
+        t('admin.supplierAddFailedMessage')
       );
     }
   };
@@ -366,10 +366,10 @@ function AdminDashboard() {
       setEditSupplier({});
       
       await fetchSuppliers(); // Refresh suppliers list
-      showSuccess('Supplier Updated Successfully!', `${editSupplier.name} has been updated.`);
+      showSuccess(t('admin.supplierUpdated'), `${editSupplier.name} ${t('admin.supplierUpdatedMessage')}`);
     } catch (error) {
       console.error('Error updating supplier:', error);
-      showError('Failed to Update Supplier', 'There was an error updating the supplier. Please try again.');
+      showError(t('admin.supplierUpdateFailed'), t('admin.supplierUpdateFailedMessage'));
     }
   };
 
@@ -384,10 +384,10 @@ function AdminDashboard() {
       setSelectedSupplier(null);
       
       await fetchSuppliers(); // Refresh suppliers list
-      showSuccess('Supplier Deleted Successfully!', `${deletedSupplierName} has been removed from the system.`);
+      showSuccess(t('admin.supplierDeleted'), `${deletedSupplierName} ${t('admin.supplierDeletedMessage')}`);
     } catch (error) {
       console.error('Error deleting supplier:', error);
-      showError('Failed to Delete Supplier', 'There was an error deleting the supplier. Please try again.');
+      showError(t('admin.supplierDeleteFailed'), t('admin.supplierDeleteFailedMessage'));
     }
   };
 
@@ -476,12 +476,7 @@ function AdminDashboard() {
     }
   }, [activeModule, isAuthenticated, fetchSuppliers]);
 
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  // Navigation modules for admin dashboard
+  // Navigation modules for admin dashboard (defined before early return to comply with hooks rules)
   const modules = [
     { id: 'overview', name: t('admin.overview'), icon: BarChart3, color: 'blue' },
     { id: 'suppliers', name: t('admin.multiTenantSuppliers'), icon: Building2, color: 'green' },
@@ -498,10 +493,10 @@ function AdminDashboard() {
     { id: 'security', name: t('admin.securityAudit'), icon: Shield, color: 'slate' }
   ];
 
-  // Overview KPI data
-  const overviewKpis = [
+  // Overview KPI data - Using React.useMemo to recreate when language changes
+  const overviewKpis = React.useMemo(() => [
     {
-      title: 'Total Suppliers',
+      title: t('admin.totalSuppliers'),
       value: 156,
       change: 15.7,
       trend: 'up',
@@ -511,7 +506,7 @@ function AdminDashboard() {
       suffix: ''
     },
     {
-      title: 'Platform Revenue',
+      title: t('admin.platformRevenue'),
       value: 125680,
       change: 12.5,
       trend: 'up',
@@ -521,7 +516,7 @@ function AdminDashboard() {
       suffix: ''
     },
     {
-      title: 'Active Orders',
+      title: t('admin.activeOrders'),
       value: 2847,
       change: 18.2,
       trend: 'up',
@@ -531,7 +526,7 @@ function AdminDashboard() {
       suffix: ''
     },
     {
-      title: 'Marketplace Integrations',
+      title: t('admin.marketplaceIntegrations'),
       value: 6,
       change: 0,
       trend: 'up',
@@ -540,7 +535,11 @@ function AdminDashboard() {
       prefix: '',
       suffix: ''
     }
-  ];
+  ], [t]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -688,14 +687,14 @@ function AdminDashboard() {
                             {t('admin.welcomeBack')}, {user?.firstName}! 👋
                           </h1>
                           <p className="text-xl text-blue-100 mb-6">
-                            Here&apos;s everything happening across your dropshipping empire
+                            {t('admin.heresEverythingHappening')}
                           </p>
                           <div className="flex items-center space-x-4">
                             <div className="bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-                              <span className="text-white font-semibold">Live Status: All Systems Operational</span>
+                              <span className="text-white font-semibold">{t('admin.liveStatusAllSystemsOperational')}</span>
                             </div>
                             <div className="bg-green-500/20 backdrop-blur-sm rounded-2xl px-4 py-2">
-                              <span className="text-green-200 font-semibold">24/7 Monitoring Active</span>
+                              <span className="text-green-200 font-semibold">{t('admin.monitoring247Active')}</span>
                             </div>
                           </div>
                         </div>
@@ -807,15 +806,15 @@ function AdminDashboard() {
                           className="space-y-6"
                         >
                           <div className="rounded-2xl bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 shadow-xl">
-                            <h3 className="text-lg font-bold text-white mb-4">System Health</h3>
+                            <h3 className="text-lg font-bold text-white mb-4">{t('admin.systemHealth')}</h3>
                             <div className="space-y-4">
                               {[
-                                { name: 'API Uptime', value: '99.9%', status: 'excellent', color: 'emerald' },
-                                { name: 'Database', value: 'Optimal', status: 'good', color: 'blue' },
-                                { name: 'Response Time', value: '89ms', status: 'excellent', color: 'green' },
-                                { name: 'Active Users', value: '2,341', status: 'good', color: 'purple' },
-                                { name: 'Storage', value: '67%', status: 'warning', color: 'yellow' },
-                                { name: 'Bandwidth', value: '45%', status: 'good', color: 'cyan' }
+                                { name: t('admin.apiUptime'), value: '99.9%', status: 'excellent', color: 'emerald' },
+                                { name: t('admin.database'), value: t('admin.optimal'), status: 'good', color: 'blue' },
+                                { name: t('admin.responseTime'), value: '89ms', status: 'excellent', color: 'green' },
+                                { name: t('admin.activeUsers'), value: '2,341', status: 'good', color: 'purple' },
+                                { name: t('admin.storage'), value: '67%', status: 'warning', color: 'yellow' },
+                                { name: t('admin.bandwidth'), value: '45%', status: 'good', color: 'cyan' }
                               ].map((metric, index) => (
                                 <div key={index} className="flex items-center justify-between">
                                   <div className="flex items-center space-x-3">
@@ -834,8 +833,8 @@ function AdminDashboard() {
                             <div className="space-y-3">
                               {[
                                 { icon: Settings, text: t('admin.systemSettings'), color: 'blue', action: () => {} },
-                                { icon: BarChart3, text: 'View Reports', color: 'purple', action: () => {} },
-                                { icon: Shield, text: 'Security Audit', color: 'orange', action: () => {} }
+                                { icon: BarChart3, text: t('admin.viewReports'), color: 'purple', action: () => {} },
+                                { icon: Shield, text: t('admin.securityAuditAction'), color: 'orange', action: () => {} }
                               ].map((action, index) => (
                                 <button
                                   key={index}
@@ -909,9 +908,9 @@ function AdminDashboard() {
                         >
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-slate-400">Pending Approval</p>
+                              <p className="text-sm font-medium text-slate-400">{t('admin.pendingApproval')}</p>
                               <p className="text-3xl font-bold text-white mt-1">{suppliersLoading ? '...' : supplierStats.pending}</p>
-                              <p className="text-xs text-yellow-400 mt-1">Awaiting review</p>
+                              <p className="text-xs text-yellow-400 mt-1">{t('admin.awaitingReview')}</p>
                             </div>
                             <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
                               <Clock className="w-6 h-6 text-white" />
@@ -960,12 +959,12 @@ function AdminDashboard() {
                           <table className="w-full">
                             <thead>
                               <tr className="border-b border-slate-700/50">
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Supplier</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Status</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Phone</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Country</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Address</th>
-                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">Actions</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.supplier')}</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.status')}</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.phone')}</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.country')}</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.address')}</th>
+                                <th className="text-left py-4 px-6 font-semibold text-slate-300 text-sm uppercase tracking-wider">{t('admin.actions')}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1040,7 +1039,7 @@ function AdminDashboard() {
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => viewSupplier(supplier)}
                                         className="p-2 text-blue-400 hover:bg-blue-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-blue-500/30"
-                                        title="View Supplier"
+                                        title={t('admin.viewSupplier')}
                                       >
                                         <Eye className="w-5 h-5" />
                                       </motion.button>
@@ -1049,7 +1048,7 @@ function AdminDashboard() {
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => openEditSupplierModal(supplier)}
                                         className="p-2 text-emerald-400 hover:bg-emerald-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-emerald-500/30"
-                                        title="Edit Supplier"
+                                        title={t('admin.editSupplier')}
                                       >
                                         <Edit className="w-5 h-5" />
                                       </motion.button>
@@ -1058,7 +1057,7 @@ function AdminDashboard() {
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => openDeleteSupplierModal(supplier)}
                                         className="p-2 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors duration-200 border border-transparent hover:border-red-500/30"
-                                        title="Delete Supplier"
+                                        title={t('admin.deleteSupplier')}
                                       >
                                         <Trash2 className="w-5 h-5" />
                                       </motion.button>
@@ -1598,13 +1597,13 @@ function AdminDashboard() {
 
                       {/* Order Status Pipeline */}
                       <div className="p-8 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                        <h3 className="text-2xl font-bold text-white mb-8">Order Status Pipeline</h3>
+                        <h3 className="text-2xl font-bold text-white mb-8">{t('admin.orderStatusPipeline')}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                           {[
-                            { status: 'To Pick', count: 45, color: 'from-yellow-500 to-orange-600', icon: Clock, description: 'Orders ready for picking' },
-                            { status: 'Picking', count: 12, color: 'from-blue-500 to-cyan-600', icon: Package, description: 'Currently being picked' },
-                            { status: 'Packed', count: 23, color: 'from-emerald-500 to-green-600', icon: CheckCircle, description: 'Ready for shipment' },
-                            { status: 'Shipped', count: 156, color: 'from-purple-500 to-pink-600', icon: Truck, description: 'Out for delivery' }
+                            { status: t('admin.toPick'), count: 45, color: 'from-yellow-500 to-orange-600', icon: Clock, description: t('admin.ordersReadyForPicking') },
+                            { status: t('admin.picking'), count: 12, color: 'from-blue-500 to-cyan-600', icon: Package, description: t('admin.currentlyBeingPicked') },
+                            { status: t('admin.packed'), count: 23, color: 'from-emerald-500 to-green-600', icon: CheckCircle, description: t('admin.readyForShipment') },
+                            { status: t('admin.shipped'), count: 156, color: 'from-purple-500 to-pink-600', icon: Truck, description: t('admin.outForDelivery') }
                           ].map((stage, index) => (
                             <motion.div
                               key={index}
@@ -1619,7 +1618,7 @@ function AdminDashboard() {
                                 </div>
                                 <h4 className="font-bold text-white text-lg mb-2">{stage.status}</h4>
                                 <p className="text-4xl font-bold text-white">{stage.count}</p>
-                                <p className="text-sm text-slate-400 mt-2">orders</p>
+                                <p className="text-sm text-slate-400 mt-2">{t('admin.ordersText')}</p>
                               </div>
                             </motion.div>
                           ))}
@@ -1629,13 +1628,13 @@ function AdminDashboard() {
                       {/* Mobile Integration */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">Mobile Integration</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.mobileIntegration')}</h3>
                           <div className="space-y-4">
                             {[
-                              { icon: Smartphone, text: 'Mobile barcode scanning', color: 'blue' },
-                              { icon: QrCode, text: 'QR code generation', color: 'emerald' },
-                              { icon: Printer, text: 'Thermal printing', color: 'purple' },
-                              { icon: Upload, text: 'Photo verification', color: 'orange' }
+                              { icon: Smartphone, text: t('admin.mobileBarcodeScanning'), color: 'blue' },
+                              { icon: QrCode, text: t('admin.qrCodeGeneration'), color: 'emerald' },
+                              { icon: Printer, text: t('admin.thermalPrinting'), color: 'purple' },
+                              { icon: Upload, text: t('admin.photoVerification'), color: 'orange' }
                             ].map((feature, index) => (
                               <motion.div
                                 key={index}
@@ -1654,13 +1653,13 @@ function AdminDashboard() {
                         </div>
 
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">Pick Performance</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.pickPerformance')}</h3>
                           <div className="space-y-5">
                             {[
-                              { label: 'Average Pick Time', value: '3.2 min', color: 'blue', trend: 'down', good: true },
-                              { label: 'Accuracy Rate', value: '99.2%', color: 'emerald', trend: 'up', good: true },
-                              { label: 'Missing Products', value: '0.8%', color: 'red', trend: 'down', good: true },
-                              { label: 'Daily Picks', value: '1,247', color: 'purple', trend: 'up', good: true }
+                              { label: t('admin.averagePickTime'), value: '3.2 min', color: 'blue', trend: 'down', good: true },
+                              { label: t('admin.accuracyRate'), value: '99.2%', color: 'emerald', trend: 'up', good: true },
+                              { label: t('admin.missingProducts'), value: '0.8%', color: 'red', trend: 'down', good: true },
+                              { label: t('admin.dailyPicks'), value: '1,247', color: 'purple', trend: 'up', good: true }
                             ].map((metric, index) => (
                               <motion.div
                                 key={index}
@@ -1727,30 +1726,30 @@ function AdminDashboard() {
                                 <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${
                                   marketplace.status === 'Connected' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
                                 }`}>
-                                  {marketplace.status}
+                                  {marketplace.status === 'Connected' ? t('admin.connected') : t('admin.pending')}
                                 </span>
                               </div>
                               <h3 className="text-xl font-bold text-white mb-4">{marketplace.name}</h3>
                               <div className="space-y-3 mb-4">
                                 <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">Products</span>
+                                  <span className="text-slate-400 text-sm">{t('admin.products')}</span>
                                   <span className="font-bold text-white">{marketplace.products.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">Orders</span>
+                                  <span className="text-slate-400 text-sm">{t('admin.orders')}</span>
                                   <span className="font-bold text-white">{marketplace.orders}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">Revenue</span>
+                                  <span className="text-slate-400 text-sm">{t('admin.revenue')}</span>
                                   <span className="font-bold text-emerald-400">{marketplace.revenue}</span>
                                 </div>
                               </div>
                               <div className="flex space-x-2">
                                 <button className="flex-1 py-2.5 text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-blue-500/50">
-                                  Configure
+                                  {t('admin.configure')}
                                 </button>
                                 <button className="flex-1 py-2.5 text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all duration-200 shadow-lg">
-                                  Sync
+                                  {t('admin.sync')}
                                 </button>
                               </div>
                             </div>
@@ -1837,10 +1836,10 @@ function AdminDashboard() {
                       {/* Wallet Overview */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
-                          { title: 'Total Balance', value: '$2,456,780', icon: DollarSign, color: 'from-emerald-500 to-green-600' },
-                          { title: 'Pending Withdrawals', value: '$45,680', icon: Clock, color: 'from-yellow-500 to-orange-600' },
-                          { title: 'Monthly Inflow', value: '$1,234,567', icon: TrendingUp, color: 'from-blue-500 to-cyan-600' },
-                          { title: 'KYC Pending', value: '12', icon: UserCheck, color: 'from-purple-500 to-pink-600' }
+                          { title: t('admin.totalBalance'), value: '$2,456,780', icon: DollarSign, color: 'from-emerald-500 to-green-600' },
+                          { title: t('admin.pendingWithdrawals'), value: '$45,680', icon: Clock, color: 'from-yellow-500 to-orange-600' },
+                          { title: t('admin.monthlyInflow'), value: '$1,234,567', icon: TrendingUp, color: 'from-blue-500 to-cyan-600' },
+                          { title: t('admin.kycPending'), value: '12', icon: UserCheck, color: 'from-purple-500 to-pink-600' }
                         ].map((stat, index) => (
                           <motion.div
                             key={index}
@@ -1865,13 +1864,13 @@ function AdminDashboard() {
                       {/* Wallet Management */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">Recent Transactions</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.recentTransactions')}</h3>
                           <div className="space-y-4">
                             {[
-                              { type: 'Inflow', amount: '$12,450', supplier: 'TechSupply Pro', status: 'Completed', time: '2 hours ago' },
-                              { type: 'Withdrawal', amount: '$8,920', supplier: 'Global Electronics', status: 'Pending', time: '4 hours ago' },
-                              { type: 'Inflow', amount: '$5,670', supplier: 'Fashion Forward', status: 'Completed', time: '6 hours ago' },
-                              { type: 'Fee', amount: '$230', supplier: 'Home & Garden Co', status: 'Completed', time: '8 hours ago' }
+                              { type: t('admin.inflow'), amount: '$12,450', supplier: 'TechSupply Pro', status: t('admin.completed'), time: `2 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.withdrawal'), amount: '$8,920', supplier: 'Global Electronics', status: t('admin.pending'), time: `4 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.inflow'), amount: '$5,670', supplier: 'Fashion Forward', status: t('admin.completed'), time: `6 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.fee'), amount: '$230', supplier: 'Home & Garden Co', status: t('admin.completed'), time: `8 ${t('admin.hoursAgo')}` }
                             ].map((transaction, index) => (
                               <motion.div
                                 key={index}
@@ -1917,13 +1916,13 @@ function AdminDashboard() {
                         </div>
 
                         <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">KYC Verification Queue</h3>
+                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.kycVerificationQueue')}</h3>
                           <div className="space-y-4">
                             {[
-                              { supplier: 'Sports Central', amount: '$15,600', status: 'Pending Review', days: 2 },
-                              { supplier: 'TechGear Inc', amount: '$8,900', status: 'Documents Required', days: 1 },
-                              { supplier: 'Fashion Hub', amount: '$12,300', status: 'Under Review', days: 3 },
-                              { supplier: 'ElectroMax', amount: '$6,750', status: 'Pending Review', days: 1 }
+                              { supplier: 'Sports Central', amount: '$15,600', status: t('admin.pendingReview'), days: 2 },
+                              { supplier: 'TechGear Inc', amount: '$8,900', status: t('admin.documentsRequired'), days: 1 },
+                              { supplier: 'Fashion Hub', amount: '$12,300', status: t('admin.underReview'), days: 3 },
+                              { supplier: 'ElectroMax', amount: '$6,750', status: t('admin.pendingReview'), days: 1 }
                             ].map((kyc, index) => (
                               <motion.div
                                 key={index}
@@ -1934,23 +1933,23 @@ function AdminDashboard() {
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <span className="font-semibold text-white">{kyc.supplier}</span>
-                                  <span className="text-sm text-slate-400">{kyc.days} days ago</span>
+                                  <span className="text-sm text-slate-400">{kyc.days} {t('admin.daysAgo')}</span>
                                 </div>
                                 <div className="flex items-center justify-between mb-4">
-                                  <span className="text-sm text-slate-400">Balance: <span className="text-emerald-400 font-bold">{kyc.amount}</span></span>
+                                  <span className="text-sm text-slate-400">{t('admin.balanceColon')} <span className="text-emerald-400 font-bold">{kyc.amount}</span></span>
                                   <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase ${
-                                    kyc.status === 'Pending Review' ? 'bg-yellow-500/20 text-yellow-300' :
-                                    kyc.status === 'Under Review' ? 'bg-blue-500/20 text-blue-300' : 'bg-red-500/20 text-red-300'
+                                    kyc.status === t('admin.pendingReview') ? 'bg-yellow-500/20 text-yellow-300' :
+                                    kyc.status === t('admin.underReview') ? 'bg-blue-500/20 text-blue-300' : 'bg-red-500/20 text-red-300'
                                   }`}>
                                     {kyc.status}
                                   </span>
                                 </div>
                                 <div className="flex space-x-2">
                                   <button className="flex-1 py-2 text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200">
-                                    Review
+                                    {t('admin.review')}
                                   </button>
                                   <button className="flex-1 py-2 text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all duration-200 shadow-lg">
-                                    Approve
+                                    {t('admin.approve')}
                                   </button>
                                 </div>
                               </motion.div>
@@ -1967,26 +1966,26 @@ function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Centralized Catalog Management
+                            {t('admin.centralizedCatalogManagement')}
                           </h2>
-                          <p className="text-slate-400 mt-2 text-lg">Manage product catalogs, inventory, and stock synchronization across all suppliers</p>
+                          <p className="text-slate-400 mt-2 text-lg">{t('admin.manageProductCatalogsInventory')}</p>
                         </div>
                         <button 
-                          onClick={() => showInfo('Add Product', 'Product management functionality is coming soon. You will be able to add, edit, and manage products from this section.')}
+                          onClick={() => showInfo(t('admin.addProduct'), t('admin.addProductMessage'))}
                           className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl hover:from-blue-600 hover:to-cyan-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
                         >
                           <Plus className="w-5 h-5" />
-                          <span className="font-semibold">Add Product</span>
+                          <span className="font-semibold">{t('admin.addProduct')}</span>
                         </button>
                       </div>
 
                       {/* Catalog Overview Stats */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
-                          { title: 'Total Products', value: '12,847', icon: Package, color: 'from-blue-500 to-cyan-600' },
-                          { title: 'Active Catalogs', value: '156', icon: BookOpen, color: 'from-emerald-500 to-green-600' },
-                          { title: 'Low Stock Items', value: '89', icon: AlertTriangle, color: 'from-yellow-500 to-orange-600' },
-                          { title: 'Out of Stock', value: '23', icon: XCircle, color: 'from-red-500 to-pink-600' }
+                          { title: t('admin.totalProducts'), value: '12,847', icon: Package, color: 'from-blue-500 to-cyan-600' },
+                          { title: t('admin.activeCatalogs'), value: '156', icon: BookOpen, color: 'from-emerald-500 to-green-600' },
+                          { title: t('admin.lowStockItems'), value: '89', icon: AlertTriangle, color: 'from-yellow-500 to-orange-600' },
+                          { title: t('admin.outOfStock'), value: '23', icon: XCircle, color: 'from-red-500 to-pink-600' }
                         ].map((stat, index) => (
                           <motion.div
                             key={index}
@@ -2034,13 +2033,13 @@ function AdminDashboard() {
                           <table className="w-full">
                             <thead>
                               <tr className="border-b border-slate-700/50">
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Product</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Supplier</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">SKU</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Stock</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Price</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.product')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.supplier')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.sku')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.stock')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.price')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.status')}</th>
+                                <th className="text-left py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">{t('admin.actions')}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
@@ -3665,7 +3664,7 @@ function AdminDashboard() {
                 <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
                   <Store className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">Add New Supplier</h2>
+                <h2 className="text-2xl font-bold text-white">{t('admin.addNewSupplier')}</h2>
               </div>
               <button
                 onClick={() => setShowSupplierModal(false)}
@@ -3680,33 +3679,33 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <Building2 className="w-5 h-5 text-emerald-400" />
-                  <span>Company Information</span>
+                  <span>{t('admin.companyInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Company Name *
+                      {t('admin.companyName')} *
                     </label>
                     <input
                       type="text"
                       value={newSupplier.companyName}
                       onChange={(e) => setNewSupplier({ ...newSupplier, companyName: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="Enter company name"
+                      placeholder={t('admin.enterCompanyName')}
                       required
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Contact Name *
+                      {t('admin.contactName')} *
                     </label>
                     <input
                       type="text"
                       value={newSupplier.contactName}
                       onChange={(e) => setNewSupplier({ ...newSupplier, contactName: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="Enter contact name"
+                      placeholder={t('admin.enterContactName')}
                       required
                     />
                   </div>
@@ -3717,33 +3716,33 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <User className="w-5 h-5 text-emerald-400" />
-                  <span>Contact Information</span>
+                  <span>{t('admin.contactInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Email Address *
+                      {t('admin.email')} *
                     </label>
                     <input
                       type="email"
                       value={newSupplier.email}
                       onChange={(e) => setNewSupplier({ ...newSupplier, email: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="supplier@example.com"
+                      placeholder={t('admin.enterEmail')}
                       required
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Phone Number *
+                      {t('admin.phone')} *
                     </label>
                     <input
                       type="tel"
                       value={newSupplier.phone}
                       onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="+1 (555) 123-4567"
+                      placeholder={t('admin.enterPhone')}
                       required
                     />
                   </div>
@@ -3754,19 +3753,19 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <MapPin className="w-5 h-5 text-emerald-400" />
-                  <span>Address Information</span>
+                  <span>{t('admin.addressInformation')}</span>
                 </h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Street Address *
+                      {t('admin.address')} *
                     </label>
                     <input
                       type="text"
                       value={newSupplier.address}
                       onChange={(e) => setNewSupplier({ ...newSupplier, address: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="123 Main Street"
+                      placeholder={t('admin.enterAddress')}
                       required
                     />
                   </div>
@@ -3774,28 +3773,28 @@ function AdminDashboard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        City *
+                        {t('admin.city')} *
                       </label>
                       <input
                         type="text"
                         value={newSupplier.city}
                         onChange={(e) => setNewSupplier({ ...newSupplier, city: e.target.value })}
                         className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                        placeholder="New York"
+                        placeholder={t('admin.enterCity')}
                         required
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">
-                        Country *
+                        {t('admin.country')} *
                       </label>
                       <input
                         type="text"
                         value={newSupplier.country}
                         onChange={(e) => setNewSupplier({ ...newSupplier, country: e.target.value })}
                         className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                        placeholder="United States"
+                        placeholder={t('admin.enterCountry')}
                         required
                       />
                     </div>
@@ -3807,32 +3806,32 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <FileText className="w-5 h-5 text-emerald-400" />
-                  <span>Additional Information</span>
+                  <span>{t('admin.additionalInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Tax ID / VAT Number
+                      {t('admin.taxId')}
                     </label>
                     <input
                       type="text"
                       value={newSupplier.taxId}
                       onChange={(e) => setNewSupplier({ ...newSupplier, taxId: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="123-45-6789"
+                      placeholder={t('admin.enterTaxId')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Website
+                      {t('admin.website')}
                     </label>
                     <input
                       type="url"
                       value={newSupplier.website}
                       onChange={(e) => setNewSupplier({ ...newSupplier, website: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 outline-none transition-all duration-200"
-                      placeholder="https://example.com"
+                      placeholder={t('admin.enterWebsite')}
                     />
                   </div>
                 </div>
@@ -3845,14 +3844,14 @@ function AdminDashboard() {
                   onClick={() => setShowSupplierModal(false)}
                   className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
                 >
-                  Cancel
+                  {t('admin.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Add Supplier</span>
+                  <span>{t('admin.add')}</span>
                 </button>
               </div>
             </form>
@@ -3882,7 +3881,7 @@ function AdminDashboard() {
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
                   <Edit className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">Edit Supplier</h2>
+                <h2 className="text-2xl font-bold text-white">{t('admin.editSupplierTitle')}</h2>
               </div>
               <button
                 onClick={() => setShowEditSupplierModal(false)}
@@ -3897,28 +3896,28 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <Building2 className="w-5 h-5 text-blue-400" />
-                  <span>Company Information</span>
+                  <span>{t('admin.companyInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Company Name *</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.companyName')} *</label>
                     <input
                       type="text"
                       value={editSupplier.name || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, name: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="Enter company name"
+                      placeholder={t('admin.enterCompanyName')}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Email Address *</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.email')} *</label>
                     <input
                       type="email"
                       value={editSupplier.email || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, email: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="company@example.com"
+                      placeholder={t('admin.enterEmail')}
                       required
                     />
                   </div>
@@ -3929,27 +3928,27 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <UserCheck className="w-5 h-5 text-green-400" />
-                  <span>Contact Information</span>
+                  <span>{t('admin.contactInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Contact Name</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.contactName')}</label>
                     <input
                       type="text"
                       value={editSupplier.contactName || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, contactName: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="Contact person name"
+                      placeholder={t('admin.enterContactName')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Phone Number</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.phone')}</label>
                     <input
                       type="tel"
                       value={editSupplier.phone || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, phone: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="+1 (555) 123-4567"
+                      placeholder={t('admin.enterPhone')}
                     />
                   </div>
                 </div>
@@ -3959,41 +3958,41 @@ function AdminDashboard() {
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <MapPin className="w-5 h-5 text-purple-400" />
-                  <span>Address Information</span>
+                  <span>{t('admin.addressInformation')}</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Address</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.address')}</label>
                     <input
                       type="text"
                       value={editSupplier.address || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, address: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="Street address"
+                      placeholder={t('admin.enterAddress')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">City</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.city')}</label>
                     <input
                       type="text"
                       value={editSupplier.city || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, city: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="City name"
+                      placeholder={t('admin.enterCity')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Country</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.country')}</label>
                     <input
                       type="text"
                       value={editSupplier.country || ''}
                       onChange={(e) => setEditSupplier({...editSupplier, country: e.target.value})}
                       className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-                      placeholder="Country name"
+                      placeholder={t('admin.enterCountry')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">{t('admin.status')}</label>
                     <div className="relative status-dropdown">
                       <button
                         type="button"
@@ -4009,11 +4008,11 @@ function AdminDashboard() {
                             'bg-emerald-500 shadow-emerald-500/50 shadow-lg'
                           }`}></div>
                           <span className="font-medium">
-                            {editSupplier.status === 'ACTIVE' ? 'Active' :
-                             editSupplier.status === 'PENDING' ? 'Pending' :
-                             editSupplier.status === 'SUSPENDED' ? 'Suspended' :
-                             editSupplier.status === 'INACTIVE' ? 'Inactive' :
-                             'Active'}
+                            {editSupplier.status === 'ACTIVE' ? t('admin.active') :
+                             editSupplier.status === 'PENDING' ? t('admin.pending') :
+                             editSupplier.status === 'SUSPENDED' ? t('admin.suspended') :
+                             editSupplier.status === 'INACTIVE' ? t('admin.inactive') :
+                             t('admin.active')}
                           </span>
                         </div>
                         <svg className={`w-5 h-5 text-slate-400 transition-all duration-300 ${showStatusDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4032,10 +4031,10 @@ function AdminDashboard() {
                             className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-slate-600/50 rounded-xl shadow-2xl z-50 overflow-hidden"
                           >
                             {[
-                              { value: 'ACTIVE', label: 'Active', color: 'emerald', icon: '✓' },
-                              { value: 'PENDING', label: 'Pending', color: 'yellow', icon: '⏳' },
-                              { value: 'SUSPENDED', label: 'Suspended', color: 'red', icon: '⛔' },
-                              { value: 'INACTIVE', label: 'Inactive', color: 'slate', icon: '⏸️' }
+                              { value: 'ACTIVE', label: t('admin.active'), color: 'emerald', icon: '✓' },
+                              { value: 'PENDING', label: t('admin.pending'), color: 'yellow', icon: '⏳' },
+                              { value: 'SUSPENDED', label: t('admin.suspended'), color: 'red', icon: '⛔' },
+                              { value: 'INACTIVE', label: t('admin.inactive'), color: 'slate', icon: '⏸️' }
                             ].map((option, index) => (
                               <motion.button
                                 key={option.value}
@@ -4078,14 +4077,14 @@ function AdminDashboard() {
                   onClick={() => setShowEditSupplierModal(false)}
                   className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
                 >
-                  Cancel
+                  {t('admin.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <Edit className="w-5 h-5" />
-                  <span>Update Supplier</span>
+                  <span>{t('admin.save')}</span>
                 </button>
               </div>
             </form>
@@ -4115,10 +4114,10 @@ function AdminDashboard() {
                 <Trash2 className="w-8 h-8 text-white" />
               </div>
               
-              <h2 className="text-2xl font-bold text-white mb-4">Delete Supplier</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">{t('admin.deleteSupplierTitle')}</h2>
               <p className="text-slate-300 mb-6">
-                Are you sure you want to delete <span className="font-semibold text-white">{selectedSupplier.name}</span>? 
-                This action cannot be undone and will permanently remove all supplier data.
+                {t('admin.deleteSupplierConfirm')} <span className="font-semibold text-white">{selectedSupplier.name}</span>? 
+                {t('admin.deleteSupplierWarning')}
               </p>
               
               <div className="flex items-center space-x-3">
@@ -4126,14 +4125,14 @@ function AdminDashboard() {
                   onClick={() => setShowDeleteSupplierModal(false)}
                   className="flex-1 px-6 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-slate-500/50"
                 >
-                  Cancel
+                  {t('admin.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteSupplier}
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
                 >
                   <Trash2 className="w-5 h-5" />
-                  <span>Delete</span>
+                  <span>{t('admin.delete')}</span>
                 </button>
               </div>
             </div>

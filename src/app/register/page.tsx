@@ -24,18 +24,30 @@ import {
   Package
 } from 'lucide-react';
 
-const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+const createRegisterSchema = (t: (key: string) => string) => z.object({
+  firstName: z.string().min(2, t('auth.firstNameMinLength')),
+  lastName: z.string().min(2, t('auth.lastNameMinLength')),
+  email: z.string().email(t('auth.pleaseEnterValidEmail')),
+  password: z.string().min(6, t('auth.passwordMinLength')),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: t('auth.passwordsDontMatch'),
   path: ["confirmPassword"],
 });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+// Default schema for TypeScript type inference
+const defaultRegisterSchema = z.object({
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormData = z.infer<typeof defaultRegisterSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -46,6 +58,9 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Create schema with translations
+  const registerSchema = React.useMemo(() => createRegisterSchema(t), [t]);
 
   const {
     register,
@@ -218,10 +233,10 @@ export default function RegisterPage() {
                   </motion.div>
                   
                   <h2 className="text-3xl font-bold mb-3 text-white text-center">
-                    Join Our Platform
+                    {t('auth.joinPlatform')}
                   </h2>
                   <p className="text-lg text-white/90 leading-relaxed text-center">
-                    Start managing your dropshipping business today
+                    {t('auth.startManagingBusiness')}
                   </p>
                 </motion.div>
 
@@ -273,10 +288,10 @@ export default function RegisterPage() {
                 {/* Header */}
                 <div className="text-center mb-6">
                    <h2 className="text-2xl font-bold text-white mb-2">
-                     Create Account
+                     {t('auth.createAccountTitle')}
                    </h2>
                    <p className="text-gray-300">
-                     Join us and start managing your business
+                     {t('auth.joinManageBusiness')}
           </p>
         </div>
 
@@ -297,7 +312,7 @@ export default function RegisterPage() {
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input
                           {...register('firstName')}
-                          placeholder="John"
+                          placeholder={t('auth.johnPlaceholder')}
                           className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
                             errors.firstName ? 'border-red-500' : ''
                           }`}
@@ -322,7 +337,7 @@ export default function RegisterPage() {
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input
                           {...register('lastName')}
-                          placeholder="Doe"
+                          placeholder={t('auth.doePlaceholder')}
                           className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
                             errors.lastName ? 'border-red-500' : ''
                           }`}
@@ -350,7 +365,7 @@ export default function RegisterPage() {
                       <input
                         {...register('email')}
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder={t('auth.emailPlaceholder')}
                         className={`w-full pl-10 pr-10 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
                           errors.email ? 'border-red-500' : ''
                         }`}
@@ -378,7 +393,7 @@ export default function RegisterPage() {
                         <input
                 {...register('password')}
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="Enter password"
+                          placeholder={t('auth.enterPasswordPlaceholder')}
                           className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
                             errors.password ? 'border-red-500' : ''
                           }`}
@@ -411,7 +426,7 @@ export default function RegisterPage() {
                         <input
                 {...register('confirmPassword')}
                           type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder="Confirm password"
+                          placeholder={t('auth.confirmPasswordPlaceholder')}
                           className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 ${
                             errors.confirmPassword ? 'border-red-500' : ''
                           }`}
@@ -516,7 +531,7 @@ export default function RegisterPage() {
                         className="w-full flex items-center justify-center px-4 py-3 border border-gray-600 rounded-lg shadow-sm bg-gradient-to-r from-emerald-600/20 to-green-600/20 text-sm font-medium text-emerald-300 hover:from-emerald-600/30 hover:to-green-600/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 cursor-pointer transition-all duration-200 border-emerald-500/30 hover:border-emerald-400/50"
                       >
                         <Package className="w-5 h-5 mr-3 text-emerald-400" />
-                        Register as Supplier
+                        {t('auth.registerAsSupplier')}
                       </motion.button>
                     </div>
                   </motion.div>

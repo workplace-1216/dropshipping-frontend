@@ -94,7 +94,7 @@ export default function Dashboard() {
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading || pageLoading) {
-    return <PageLoader isLoading={true} message="Loading Dashboard..." />;
+    return <PageLoader isLoading={true} message={t('dashboard.loadingDashboardMessage')} />;
   }
 
   if (!isAuthenticated) {
@@ -118,10 +118,7 @@ export default function Dashboard() {
                 {t('dashboard.welcome')}, {user?.firstName || 'User'}! 👋
               </h1>
               <p className="mt-3 text-slate-300 text-lg">
-                {currentLanguage === 'pt' 
-                  ? `Veja o que está acontecendo com seu negócio ${user?.role || 'SELLER'} hoje.`
-                  : `Here's what's happening with your ${user?.role || 'SELLER'} business today.`
-                }
+                {t('dashboard.hereIsWhatHappening')} {user?.role || 'SELLER'} {t('dashboard.businessToday')}
               </p>
             </div>
             <motion.div
@@ -187,7 +184,7 @@ export default function Dashboard() {
                     }`}>
                       {Math.abs(kpi.change)}%
                     </span>
-                    <span className="text-sm text-slate-400 ml-2">vs last month</span>
+                    <span className="text-sm text-slate-400 ml-2">{t('dashboard.vsLastMonthText')}</span>
                   </div>
                 </div>
               </AnimatedCard>
@@ -205,7 +202,7 @@ export default function Dashboard() {
                     {t('dashboard.recentOrders')}
                   </h3>
                   <p className="text-slate-400 mt-1">
-                    {currentLanguage === 'pt' ? 'Atividade de transações mais recentes' : 'Latest transaction activity'}
+                    {t('dashboard.latestTransactionActivity')}
                   </p>
                 </div>
                 <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl">
@@ -248,7 +245,7 @@ export default function Dashboard() {
                   {t('dashboard.systemAlerts')}
                 </h3>
                 <p className="text-slate-400">
-                  {currentLanguage === 'pt' ? 'Notificações importantes' : 'Important notifications'}
+                  {t('dashboard.importantNotifications')}
                 </p>
               </div>
               <div className="space-y-4">

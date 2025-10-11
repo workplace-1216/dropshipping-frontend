@@ -97,7 +97,7 @@ export default function Home() {
           className="text-center"
         >
           <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-medium">Loading...</p>
+          <p className="mt-4 text-gray-600 font-medium">{t('home.loadingText')}</p>
         </motion.div>
       </div>
     );
@@ -1175,7 +1175,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-300 text-sm">White-labeled customer communications</span>
+                      <span className="text-gray-300 text-sm">{t('home.whiteLabeledCommunications')}</span>
                     </div>
                   </div>
                 </div>
@@ -1519,8 +1519,7 @@ export default function Home() {
               </h2>
 
               <p className="text-xl text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
-                {t('home.joinThousandsOfSuccessfulEntrepreneurs')}
-                to automate and grow their businesses.
+                {t('home.joinThousandsOfSuccessfulEntrepreneurs')} {t('home.toAutomateGrowBusiness')}
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

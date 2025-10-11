@@ -17,12 +17,19 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+// Create schema outside component to avoid recreation on each render
+const createLoginSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email(t('auth.pleaseEnterValidEmail')),
+  password: z.string().min(6, t('auth.passwordMinLength')),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+// Default schema for TypeScript type inference
+const defaultLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+type LoginFormData = z.infer<typeof defaultLoginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +42,9 @@ export default function LoginPage() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
+  // Create schema with translations
+  const loginSchema = React.useMemo(() => createLoginSchema(t), [t]);
 
   const {
     register,
@@ -485,7 +495,7 @@ export default function LoginPage() {
                             <div className="absolute inset-0 border-2 border-gray-400/30 rounded-full"></div>
                             <div className="absolute inset-0 border-2 border-transparent border-t-gray-200 border-r-gray-200 rounded-full animate-spin"></div>
                           </div>
-                          <span className="text-sm sm:text-base text-gray-200 font-medium">Signing in with Google...</span>
+                          <span className="text-sm sm:text-base text-gray-200 font-medium">{t('auth.signingInWithGoogle')}</span>
                         </>
                       ) : (
                         <>

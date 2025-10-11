@@ -147,7 +147,7 @@ export default function ForgotPasswordPage() {
             className="flex items-center space-x-2 text-blue-300 hover:text-blue-200 hover:bg-gray-700/50 rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
+            <span>{t('auth.back')}</span>
           </Button>
         </motion.div>
 
