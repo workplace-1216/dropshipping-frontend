@@ -716,6 +716,10 @@ const translations = {
         'admin.liveActivityFeed': 'Live Activity Feed',
         'admin.realTimePlatformEvents': 'Real-time platform events',
         'admin.live': 'LIVE',
+        'admin.vsLastMonth': 'vs last month',
+        'admin.manageIsolatedSupplierEnvironments': 'Manage isolated supplier environments and their configurations',
+        'admin.permission': 'Permission',
+        'admin.finance': 'Finance',
         'admin.securityAuditPassed': 'Security audit passed - no issues found',
         'admin.hourAgo': '1 hour ago',
         // Picking & Packing
