@@ -1054,6 +1054,13 @@ const translations = {
         'admin.friday': 'Sex',
         'admin.saturday': 'Sáb',
         'admin.sunday': 'Dom',
+        'admin.liveActivityFeed': 'Feed de Atividade ao Vivo',
+        'admin.realTimePlatformEvents': 'Eventos da plataforma em tempo real',
+        'admin.live': 'AO VIVO',
+        'admin.vsLastMonth': 'vs mês passado',
+        'admin.manageIsolatedSupplierEnvironments': 'Gerenciar ambientes isolados de fornecedores e suas configurações',
+        'admin.permission': 'Permissão',
+        'admin.finance': 'Financeiro',
         
     // Products
     'products.title': 'Produtos',
@@ -1536,10 +1543,6 @@ const translations = {
         'admin.editUsers': 'Editar Usuários',
         'admin.reports': 'Relatórios',
         'admin.usersCategory': 'Usuários',
-        'admin.liveActivityFeed': 'Feed de Atividade ao Vivo',
-        'admin.realTimePlatformEvents': 'Eventos da plataforma em tempo real',
-        'admin.live': 'AO VIVO',
-        'admin.securityAuditPassed': 'Auditoria de segurança aprovada - nenhum problema encontrado',
         'admin.hourAgo': '1 hora atrás',
         // Picking & Packing
         'admin.toPick': 'Para Separar',

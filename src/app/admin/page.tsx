@@ -744,7 +744,7 @@ function AdminDashboard() {
                                 <p className="text-3xl font-bold text-white">
                                   {kpi.prefix || ''}{kpi.value.toLocaleString()}{kpi.suffix || ''}
                                 </p>
-                                <p className="text-xs text-slate-500 mt-2">vs last month</p>
+                                <p className="text-xs text-slate-500 mt-2">{t('admin.vsLastMonth')}</p>
                               </div>
                               <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </motion.div>
@@ -772,12 +772,12 @@ function AdminDashboard() {
                         >
                           <div className="flex items-center justify-between mb-6">
                             <div>
-                              <h3 className="text-xl font-bold text-white">Live Activity Feed</h3>
-                              <p className="text-slate-400">Real-time platform events</p>
+                              <h3 className="text-xl font-bold text-white">{t('admin.liveActivityFeed')}</h3>
+                              <p className="text-slate-400">{t('admin.realTimePlatformEvents')}</p>
                             </div>
                             <div className="flex items-center space-x-2">
                               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                              <span className="text-sm text-green-400 font-medium">LIVE</span>
+                              <span className="text-sm text-green-400 font-medium">{t('admin.live')}</span>
                             </div>
                           </div>
                           <div className="space-y-4">
@@ -870,7 +870,7 @@ function AdminDashboard() {
                           <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                             {t('admin.supplierManagement')}
                           </h2>
-                          <p className="text-slate-400 mt-2 text-lg">Manage isolated supplier environments and their configurations</p>
+                          <p className="text-slate-400 mt-2 text-lg">{t('admin.manageIsolatedSupplierEnvironments')}</p>
                         </div>
                       </div>
 
@@ -1501,7 +1501,7 @@ function AdminDashboard() {
                           <table className="w-full">
                             <thead>
                                 <tr className="border-b border-slate-700">
-                                  <th className="text-left py-4 px-4 text-slate-300 font-semibold">Permission</th>
+                                  <th className="text-left py-4 px-4 text-slate-300 font-semibold">{t('admin.permission')}</th>
                                   <th className="text-center py-4 px-4 text-slate-300 font-semibold">
                                     <div className="flex items-center justify-center space-x-2">
                                       <Crown className="w-4 h-4 text-red-400" />
@@ -2927,7 +2927,7 @@ function AdminDashboard() {
                                   <p className={`text-sm font-bold ${metric.trend.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
                                     {metric.trend}
                                   </p>
-                                  <p className="text-xs text-slate-400">vs last month</p>
+                                  <p className="text-xs text-slate-400">{t('admin.vsLastMonth')}</p>
                                 </div>
                               </motion.div>
                             ))}
@@ -3215,7 +3215,7 @@ function AdminDashboard() {
                                 </div>
                                 <div className="text-right">
                                   <p className="text-sm font-bold text-green-400">{metric.trend}</p>
-                                  <p className="text-xs text-slate-400">vs last month</p>
+                                  <p className="text-xs text-slate-400">{t('admin.vsLastMonth')}</p>
                                 </div>
                               </motion.div>
                             ))}

@@ -193,9 +193,12 @@ export const AdminCharts: React.FC = () => {
             <Tooltip
               contentStyle={{
                 backgroundColor: '#1E293B',
-                border: '1px solid #334155',
+                border: '1px solid #475569',
                 borderRadius: '8px',
-                color: '#fff',
+                color: '#F8FAFC',
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
               }}
               formatter={(value: number) => [formatCurrency(value), t('admin.revenue')]}
             />
@@ -223,9 +226,12 @@ export const AdminCharts: React.FC = () => {
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1E293B',
-                  border: '1px solid #334155',
+                  border: '1px solid #475569',
                   borderRadius: '8px',
-                  color: '#fff',
+                  color: '#F8FAFC',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                 }}
               />
               <Bar dataKey="sales" fill="#3B82F6" radius={[8, 8, 0, 0]} />
@@ -243,9 +249,12 @@ export const AdminCharts: React.FC = () => {
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1E293B',
-                  border: '1px solid #334155',
+                  border: '1px solid #475569',
                   borderRadius: '8px',
-                  color: '#fff',
+                  color: '#F8FAFC',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                 }}
               />
               <Bar dataKey="orders" fill="#10B981" radius={[8, 8, 0, 0]} />
@@ -266,9 +275,12 @@ export const AdminCharts: React.FC = () => {
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1E293B',
-                  border: '1px solid #334155',
+                  border: '1px solid #475569',
                   borderRadius: '8px',
-                  color: '#fff',
+                  color: '#F8FAFC',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                 }}
               />
               <Line
@@ -304,9 +316,12 @@ export const AdminCharts: React.FC = () => {
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1E293B',
-                  border: '1px solid #334155',
+                  border: '1px solid #475569',
                   borderRadius: '8px',
-                  color: '#fff',
+                  color: '#F8FAFC',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                 }}
                 formatter={(value: number) => formatCurrency(value)}
               />
