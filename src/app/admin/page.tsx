@@ -12,6 +12,9 @@ import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { AdminNotificationComponent, useAdminNotifications, AdminNotification } from '@/components/ui/AdminNotification';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AdminCharts } from '@/components/admin/AdminCharts';
+import { PickingPackingSystem } from '@/components/admin/PickingPackingSystem';
+import { MarketplaceIntegration } from '@/components/admin/MarketplaceIntegration';
+import { CatalogManagement } from '@/components/admin/CatalogManagement';
 import { formatCurrency } from '@/lib/utils';
 import { 
   Package, 
@@ -1599,242 +1602,16 @@ function AdminDashboard() {
                   )}
 
                   {activeModule === 'picking' && (
-                    <div className="space-y-8">
-                      {/* Picking & Packing Header */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Picking & Packing Management
-                          </h2>
-                          <p className="text-slate-400 mt-2 text-lg">Track order fulfillment with barcode scanning and mobile support</p>
-                        </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl hover:from-orange-600 hover:to-red-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
-                          <QrCode className="w-5 h-5" />
-                          <span className="font-semibold">Scan Barcode</span>
-                        </button>
-                      </div>
-
-                      {/* Order Status Pipeline */}
-                      <div className="p-8 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                        <h3 className="text-2xl font-bold text-white mb-8">{t('admin.orderStatusPipeline')}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                          {[
-                            { status: t('admin.toPick'), count: 45, color: 'from-yellow-500 to-orange-600', icon: Clock, description: t('admin.ordersReadyForPicking') },
-                            { status: t('admin.picking'), count: 12, color: 'from-blue-500 to-cyan-600', icon: Package, description: t('admin.currentlyBeingPicked') },
-                            { status: t('admin.packed'), count: 23, color: 'from-emerald-500 to-green-600', icon: CheckCircle, description: t('admin.readyForShipment') },
-                            { status: t('admin.shipped'), count: 156, color: 'from-purple-500 to-pink-600', icon: Truck, description: t('admin.outForDelivery') }
-                          ].map((stage, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.4, delay: index * 0.1 }}
-                              className="relative group"
-                            >
-                              <div className="text-center p-6 bg-slate-700/30 rounded-2xl border border-slate-600/30 hover:border-slate-500/50 transition-all duration-300">
-                                <div className={`w-20 h-20 bg-gradient-to-br ${stage.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                  <stage.icon className="w-10 h-10 text-white" />
-                                </div>
-                                <h4 className="font-bold text-white text-lg mb-2">{stage.status}</h4>
-                                <p className="text-4xl font-bold text-white">{stage.count}</p>
-                                <p className="text-sm text-slate-400 mt-2">{t('admin.ordersText')}</p>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Mobile Integration */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.mobileIntegration')}</h3>
-                          <div className="space-y-4">
-                            {[
-                              { icon: Smartphone, text: t('admin.mobileBarcodeScanning'), color: 'blue' },
-                              { icon: QrCode, text: t('admin.qrCodeGeneration'), color: 'emerald' },
-                              { icon: Printer, text: t('admin.thermalPrinting'), color: 'purple' },
-                              { icon: Upload, text: t('admin.photoVerification'), color: 'orange' }
-                            ].map((feature, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className="flex items-center space-x-4 p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-all duration-200 group"
-                              >
-                                <div className={`w-12 h-12 bg-${feature.color}-500/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                  <feature.icon className={`w-6 h-6 text-${feature.color}-400`} />
-                                </div>
-                                <span className="text-white font-medium">{feature.text}</span>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.pickPerformance')}</h3>
-                          <div className="space-y-5">
-                            {[
-                              { label: t('admin.averagePickTime'), value: '3.2 min', color: 'blue', trend: 'down', good: true },
-                              { label: t('admin.accuracyRate'), value: '99.2%', color: 'emerald', trend: 'up', good: true },
-                              { label: t('admin.missingProducts'), value: '0.8%', color: 'red', trend: 'down', good: true },
-                              { label: t('admin.dailyPicks'), value: '1,247', color: 'purple', trend: 'up', good: true }
-                            ].map((metric, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className="flex justify-between items-center p-3 bg-slate-700/30 rounded-xl"
-                              >
-                                <span className="text-slate-300 font-medium">{metric.label}</span>
-                                <div className="flex items-center space-x-2">
-                                  <span className={`font-bold text-lg text-${metric.color}-400`}>{metric.value}</span>
-                                  {metric.trend === 'up' ? (
-                                    <TrendingUp className={`w-4 h-4 ${metric.good ? 'text-emerald-400' : 'text-red-400'}`} />
-                                  ) : (
-                                    <TrendingDown className={`w-4 h-4 ${metric.good ? 'text-emerald-400' : 'text-red-400'}`} />
-                                  )}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <PickingPackingSystem />
                   )}
 
-                  {activeModule === 'marketplaces' && (
-                    <div className="space-y-8">
-                      {/* Marketplace Integration Header */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                            Marketplace Integration Management
-                          </h2>
-                          <p className="text-slate-400 mt-2 text-lg">Manage OAuth/API keys and real-time synchronization across multiple marketplaces</p>
-                        </div>
-                        <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-2xl hover:from-cyan-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl">
-                          <Plus className="w-5 h-5" />
-                          <span className="font-semibold">Add Marketplace</span>
-                        </button>
-                      </div>
+        {activeModule === 'marketplaces' && (
+          <MarketplaceIntegration />
+        )}
 
-                      {/* Marketplace Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                          { name: 'Shopee', status: 'Connected', products: 1250, orders: 456, revenue: '$45,680', icon: ShoppingCart, color: 'from-orange-500 to-red-600' },
-                          { name: 'Mercado Livre', status: 'Connected', products: 890, orders: 234, revenue: '$32,450', icon: Heart, color: 'from-yellow-500 to-orange-600' },
-                          { name: 'TikTok Shop', status: 'Connected', products: 678, orders: 189, revenue: '$28,920', icon: Music, color: 'from-pink-500 to-purple-600' },
-                          { name: 'Kwai Shop', status: 'Pending', products: 456, orders: 67, revenue: '$12,340', icon: Smartphone, color: 'from-purple-500 to-indigo-600' },
-                          { name: 'Amazon', status: 'Connected', products: 234, orders: 123, revenue: '$18,760', icon: Package, color: 'from-blue-500 to-cyan-600' },
-                          { name: 'Magalu', status: 'Connected', products: 567, orders: 198, revenue: '$22,890', icon: Building2, color: 'from-red-500 to-pink-600' }
-                        ].map((marketplace, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.4, delay: index * 0.1 }}
-                            className="group p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
-                          >
-                            <div className="relative z-10">
-                              <div className="flex items-center justify-between mb-4">
-                                <div className={`w-14 h-14 bg-gradient-to-br ${marketplace.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                                  <marketplace.icon className="w-7 h-7 text-white" />
-                                </div>
-                                <span className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${
-                                  marketplace.status === 'Connected' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                                }`}>
-                                  {marketplace.status === 'Connected' ? t('admin.connected') : t('admin.pending')}
-                                </span>
-                              </div>
-                              <h3 className="text-xl font-bold text-white mb-4">{marketplace.name}</h3>
-                              <div className="space-y-3 mb-4">
-                                <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">{t('admin.products')}</span>
-                                  <span className="font-bold text-white">{marketplace.products.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">{t('admin.orders')}</span>
-                                  <span className="font-bold text-white">{marketplace.orders}</span>
-                                </div>
-                                <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
-                                  <span className="text-slate-400 text-sm">{t('admin.revenue')}</span>
-                                  <span className="font-bold text-emerald-400">{formatCurrency(marketplace.revenue, currentLanguage)}</span>
-                                </div>
-                              </div>
-                              <div className="flex space-x-2">
-                                <button className="flex-1 py-2.5 text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl transition-all duration-200 border border-slate-600/50 hover:border-blue-500/50">
-                                  {t('admin.configure')}
-                                </button>
-                                <button className="flex-1 py-2.5 text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all duration-200 shadow-lg">
-                                  {t('admin.sync')}
-                                </button>
-                              </div>
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          </motion.div>
-                        ))}
-                      </div>
-
-                      {/* API Management */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.oauthApiKeyManagement')}</h3>
-                          <div className="space-y-4">
-                            {[
-                              { name: t('admin.shopeeApi'), status: t('admin.active'), lastSync: `2 ${t('admin.minutesAgo')}` },
-                              { name: t('admin.mercadoLivreApi'), status: t('admin.active'), lastSync: `5 ${t('admin.minutesAgo')}` },
-                              { name: t('admin.tikTokShopApi'), status: t('admin.pending'), lastSync: t('admin.awaitingApproval') }
-                            ].map((api, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className="p-4 bg-slate-700/30 rounded-xl hover:bg-slate-700/50 transition-all duration-200"
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="font-semibold text-white">{api.name}</span>
-                                  <span className={`text-sm font-medium px-3 py-1 rounded-lg ${
-                                    api.status === 'Active' 
-                                      ? 'bg-emerald-500/20 text-emerald-300' 
-                                      : 'bg-yellow-500/20 text-yellow-300'
-                                  }`}>
-                                    {api.status}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-slate-400">{api.lastSync}</p>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="p-6 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl">
-                          <h3 className="text-xl font-bold text-white mb-6">{t('admin.syncPerformance')}</h3>
-                          <div className="space-y-5">
-                            {[
-                              { label: t('admin.productSyncRate'), value: '99.2%', color: 'emerald' },
-                              { label: t('admin.stockSyncRate'), value: '98.8%', color: 'blue' },
-                              { label: t('admin.orderSyncRate'), value: '99.5%', color: 'purple' },
-                              { label: t('admin.averageSyncTime'), value: '2.3s', color: 'cyan' }
-                            ].map((metric, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className="flex justify-between items-center p-3 bg-slate-700/30 rounded-xl"
-                              >
-                                <span className="text-slate-300 font-medium">{metric.label}</span>
-                                <span className={`font-bold text-lg text-${metric.color}-400`}>{metric.value}</span>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+        {activeModule === 'catalog' && (
+          <CatalogManagement />
+        )}
 
                   {activeModule === 'wallet' && (
                     <div className="space-y-8">
