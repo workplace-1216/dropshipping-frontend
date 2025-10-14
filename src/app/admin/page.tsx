@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
@@ -12,6 +12,7 @@ import AlertModal, { useAlertModal } from '@/components/ui/AlertModal';
 import { AdminNotificationComponent, useAdminNotifications, AdminNotification } from '@/components/ui/AdminNotification';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AdminCharts } from '@/components/admin/AdminCharts';
+import { formatCurrency } from '@/lib/utils';
 import { 
   Package, 
   ShoppingCart, 
@@ -64,7 +65,7 @@ import {
 
 function AdminDashboard() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeModule, setActiveModule] = useState('overview');
@@ -94,6 +95,7 @@ function AdminDashboard() {
   const [matrixData, setMatrixData] = useState<Record<string, Record<string, boolean>>>({});
   const { alertState, showSuccess, showError, showInfo, closeAlert } = useAlertModal();
   const { notifications, addNotification, markAsRead, removeNotification } = useAdminNotifications();
+  const notificationsFetched = useRef(false);
 
   // Handle supplier approval/rejection
   const handleApproveSupplier = async (supplierData: unknown) => {
@@ -411,6 +413,9 @@ function AdminDashboard() {
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
+    // Prevent duplicate fetches
+    if (notificationsFetched.current) return;
+    
     try {
       interface BackendNotification {
         id: string;
@@ -449,6 +454,9 @@ function AdminDashboard() {
           data: notif.data ? JSON.parse(notif.data) : undefined,
         });
       });
+      
+      // Mark as fetched
+      notificationsFetched.current = true;
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -459,7 +467,8 @@ function AdminDashboard() {
     if (isAuthenticated && user?.email === 'admin@admin.com') {
       fetchNotifications();
     }
-  }, [isAuthenticated, user, fetchNotifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]);
 
   // Load RBAC data when RBAC module is active
   useEffect(() => {
@@ -1751,7 +1760,7 @@ function AdminDashboard() {
                                 </div>
                                 <div className="flex justify-between items-center p-2 bg-slate-700/30 rounded-lg">
                                   <span className="text-slate-400 text-sm">{t('admin.revenue')}</span>
-                                  <span className="font-bold text-emerald-400">{marketplace.revenue}</span>
+                                  <span className="font-bold text-emerald-400">{formatCurrency(marketplace.revenue, currentLanguage)}</span>
                                 </div>
                               </div>
                               <div className="flex space-x-2">
@@ -1846,9 +1855,9 @@ function AdminDashboard() {
                       {/* Wallet Overview */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {[
-                          { title: t('admin.totalBalance'), value: '$2,456,780', icon: DollarSign, color: 'from-emerald-500 to-green-600' },
-                          { title: t('admin.pendingWithdrawals'), value: '$45,680', icon: Clock, color: 'from-yellow-500 to-orange-600' },
-                          { title: t('admin.monthlyInflow'), value: '$1,234,567', icon: TrendingUp, color: 'from-blue-500 to-cyan-600' },
+                          { title: t('admin.totalBalance'), value: formatCurrency('$2,456,780', currentLanguage), icon: DollarSign, color: 'from-emerald-500 to-green-600' },
+                          { title: t('admin.pendingWithdrawals'), value: formatCurrency('$45,680', currentLanguage), icon: Clock, color: 'from-yellow-500 to-orange-600' },
+                          { title: t('admin.monthlyInflow'), value: formatCurrency('$1,234,567', currentLanguage), icon: TrendingUp, color: 'from-blue-500 to-cyan-600' },
                           { title: t('admin.kycPending'), value: '12', icon: UserCheck, color: 'from-purple-500 to-pink-600' }
                         ].map((stat, index) => (
                           <motion.div
@@ -1877,10 +1886,10 @@ function AdminDashboard() {
                           <h3 className="text-xl font-bold text-white mb-6">{t('admin.recentTransactions')}</h3>
                           <div className="space-y-4">
                             {[
-                              { type: t('admin.inflow'), amount: '$12,450', supplier: 'TechSupply Pro', status: t('admin.completed'), time: `2 ${t('admin.hoursAgo')}` },
-                              { type: t('admin.withdrawal'), amount: '$8,920', supplier: 'Global Electronics', status: t('admin.pending'), time: `4 ${t('admin.hoursAgo')}` },
-                              { type: t('admin.inflow'), amount: '$5,670', supplier: 'Fashion Forward', status: t('admin.completed'), time: `6 ${t('admin.hoursAgo')}` },
-                              { type: t('admin.fee'), amount: '$230', supplier: 'Home & Garden Co', status: t('admin.completed'), time: `8 ${t('admin.hoursAgo')}` }
+                              { type: t('admin.inflow'), amount: formatCurrency('$12,450', currentLanguage), supplier: 'TechSupply Pro', status: t('admin.completed'), time: `2 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.withdrawal'), amount: formatCurrency('$8,920', currentLanguage), supplier: 'Global Electronics', status: t('admin.pending'), time: `4 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.inflow'), amount: formatCurrency('$5,670', currentLanguage), supplier: 'Fashion Forward', status: t('admin.completed'), time: `6 ${t('admin.hoursAgo')}` },
+                              { type: t('admin.fee'), amount: formatCurrency('$230', currentLanguage), supplier: 'Home & Garden Co', status: t('admin.completed'), time: `8 ${t('admin.hoursAgo')}` }
                             ].map((transaction, index) => (
                               <motion.div
                                 key={index}
@@ -1929,10 +1938,10 @@ function AdminDashboard() {
                           <h3 className="text-xl font-bold text-white mb-6">{t('admin.kycVerificationQueue')}</h3>
                           <div className="space-y-4">
                             {[
-                              { supplier: 'Sports Central', amount: '$15,600', status: t('admin.pendingReview'), days: 2 },
-                              { supplier: 'TechGear Inc', amount: '$8,900', status: t('admin.documentsRequired'), days: 1 },
-                              { supplier: 'Fashion Hub', amount: '$12,300', status: t('admin.underReview'), days: 3 },
-                              { supplier: 'ElectroMax', amount: '$6,750', status: t('admin.pendingReview'), days: 1 }
+                              { supplier: 'Sports Central', amount: formatCurrency('$15,600', currentLanguage), status: t('admin.pendingReview'), days: 2 },
+                              { supplier: 'TechGear Inc', amount: formatCurrency('$8,900', currentLanguage), status: t('admin.documentsRequired'), days: 1 },
+                              { supplier: 'Fashion Hub', amount: formatCurrency('$12,300', currentLanguage), status: t('admin.underReview'), days: 3 },
+                              { supplier: 'ElectroMax', amount: formatCurrency('$6,750', currentLanguage), status: t('admin.pendingReview'), days: 1 }
                             ].map((kyc, index) => (
                               <motion.div
                                 key={index}
@@ -2054,11 +2063,11 @@ function AdminDashboard() {
                             </thead>
                             <tbody className="divide-y divide-slate-700/30">
                               {[
-                                { name: 'Wireless Bluetooth Headphones', supplier: 'TechSupply Pro', sku: 'WH-001', stock: 245, price: '$89.99', status: 'Active' },
-                                { name: 'Smart Fitness Watch', supplier: 'Global Electronics', sku: 'SF-002', stock: 12, price: '$199.99', status: 'Low Stock' },
-                                { name: 'USB-C Fast Charger', supplier: 'TechSupply Pro', sku: 'UC-003', stock: 0, price: '$29.99', status: 'Out of Stock' },
-                                { name: 'Wireless Gaming Mouse', supplier: 'Global Electronics', sku: 'WG-004', stock: 89, price: '$79.99', status: 'Active' },
-                                { name: 'Bluetooth Speaker', supplier: 'AudioMax', sku: 'BS-005', stock: 156, price: '$129.99', status: 'Active' }
+                                { name: 'Wireless Bluetooth Headphones', supplier: 'TechSupply Pro', sku: 'WH-001', stock: 245, price: formatCurrency('$89.99', currentLanguage), status: 'Active' },
+                                { name: 'Smart Fitness Watch', supplier: 'Global Electronics', sku: 'SF-002', stock: 12, price: formatCurrency('$199.99', currentLanguage), status: 'Low Stock' },
+                                { name: 'USB-C Fast Charger', supplier: 'TechSupply Pro', sku: 'UC-003', stock: 0, price: formatCurrency('$29.99', currentLanguage), status: 'Out of Stock' },
+                                { name: 'Wireless Gaming Mouse', supplier: 'Global Electronics', sku: 'WG-004', stock: 89, price: formatCurrency('$79.99', currentLanguage), status: 'Active' },
+                                { name: 'Bluetooth Speaker', supplier: 'AudioMax', sku: 'BS-005', stock: 156, price: formatCurrency('$129.99', currentLanguage), status: 'Active' }
                               ].map((product, index) => (
                                 <motion.tr
                                   key={index}
@@ -2329,11 +2338,11 @@ function AdminDashboard() {
                           <h3 className="text-xl font-bold text-white mb-6">Recent Order Activity</h3>
                           <div className="space-y-4">
                             {[
-                              { id: '#ORD-001247', customer: 'Maria Silva', amount: '$299.99', status: 'Processing', time: '2 minutes ago', supplier: 'TechSupply Pro' },
-                              { id: '#ORD-001246', customer: 'João Santos', amount: '$149.50', status: 'Shipped', time: '15 minutes ago', supplier: 'Global Electronics' },
-                              { id: '#ORD-001245', customer: 'Ana Costa', amount: '$89.99', status: 'Delivered', time: '1 hour ago', supplier: 'Fashion Forward' },
-                              { id: '#ORD-001244', customer: 'Carlos Lima', amount: '$199.99', status: 'Processing', time: '2 hours ago', supplier: 'TechSupply Pro' },
-                              { id: '#ORD-001243', customer: 'Lucia Oliveira', amount: '$79.99', status: 'Pending', time: '3 hours ago', supplier: 'AudioMax' }
+                              { id: '#ORD-001247', customer: 'Maria Silva', amount: formatCurrency('$299.99', currentLanguage), status: 'Processing', time: '2 minutes ago', supplier: 'TechSupply Pro' },
+                              { id: '#ORD-001246', customer: 'João Santos', amount: formatCurrency('$149.50', currentLanguage), status: 'Shipped', time: '15 minutes ago', supplier: 'Global Electronics' },
+                              { id: '#ORD-001245', customer: 'Ana Costa', amount: formatCurrency('$89.99', currentLanguage), status: 'Delivered', time: '1 hour ago', supplier: 'Fashion Forward' },
+                              { id: '#ORD-001244', customer: 'Carlos Lima', amount: formatCurrency('$199.99', currentLanguage), status: 'Processing', time: '2 hours ago', supplier: 'TechSupply Pro' },
+                              { id: '#ORD-001243', customer: 'Lucia Oliveira', amount: formatCurrency('$79.99', currentLanguage), status: 'Pending', time: '3 hours ago', supplier: 'AudioMax' }
                             ].map((order, index) => (
                               <motion.div
                                 key={index}

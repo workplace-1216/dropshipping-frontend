@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -48,6 +48,7 @@ function NotificationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const { notifications, markAsRead, removeNotification } = useAdminNotifications();
+  const notificationsFetched = useRef(false);
 
   // Redirect if not admin
   useEffect(() => {
@@ -60,6 +61,9 @@ function NotificationsPage() {
 
   // Fetch notifications from backend
   const fetchNotifications = useCallback(async () => {
+    // Prevent duplicate fetches
+    if (notificationsFetched.current) return;
+    
     try {
       interface BackendNotification {
         id: string;
@@ -101,6 +105,9 @@ function NotificationsPage() {
       
       setAllNotifications(formattedNotifications);
       setFilteredNotifications(formattedNotifications);
+      
+      // Mark as fetched
+      notificationsFetched.current = true;
     } catch (error) {
       console.error('Error fetching notifications:', error);
       // Fallback to empty array on error
@@ -113,7 +120,8 @@ function NotificationsPage() {
     if (isAuthenticated && user?.email === 'admin@admin.com') {
       fetchNotifications();
     }
-  }, [isAuthenticated, user, fetchNotifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]);
 
   // Filter notifications
   useEffect(() => {

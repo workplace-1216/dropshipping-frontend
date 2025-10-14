@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { GradientButton } from '@/components/ui/GradientButton';
 import { SparklesCore } from '@/components/ui/sparkles';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { formatCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -855,10 +856,10 @@ export default function Home() {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                     <div className="relative z-10">
                       <p className="text-sm text-white/80 mb-2">{t('home.totalBalance')}</p>
-                      <p className="text-5xl font-bold text-white mb-3">$12,458.50</p>
+                      <p className="text-5xl font-bold text-white mb-3">{formatCurrency('$12,458.50', currentLanguage)}</p>
                       <div className="flex items-center space-x-2">
                         <img src="/svg/trending-up.svg" alt="Trending Up" className="w-4 h-4" />
-                        <p className="text-sm text-white/90">+$2,340 {t('home.thisMonth')} (+23%)</p>
+                        <p className="text-sm text-white/90">+{formatCurrency('$2,340', currentLanguage)} {t('home.thisMonth')} (+23%)</p>
                       </div>
                     </div>
                   </div>
@@ -880,7 +881,7 @@ export default function Home() {
                           <p className="text-sm text-gray-400">{t('home.mercadoPago')} • {t('home.today')}</p>
                         </div>
                       </div>
-                      <p className="font-bold text-green-400 text-lg">+$850.00</p>
+                      <p className="font-bold text-green-400 text-lg">+{formatCurrency('$850.00', currentLanguage)}</p>
                     </motion.div>
 
                     <motion.div
@@ -896,7 +897,7 @@ export default function Home() {
                           <p className="text-sm text-gray-400">Shopee • {t('home.yesterday')}</p>
                         </div>
                       </div>
-                      <p className="font-bold text-green-400 text-lg">+$425.00</p>
+                      <p className="font-bold text-green-400 text-lg">+{formatCurrency('$425.00', currentLanguage)}</p>
                     </motion.div>
 
                     <motion.div
@@ -912,7 +913,7 @@ export default function Home() {
                           <p className="text-sm text-gray-400">{t('home.bankTransfer')} • 2 {t('home.daysAgo')}</p>
                         </div>
                       </div>
-                      <p className="font-bold text-red-400 text-lg">-$500.00</p>
+                      <p className="font-bold text-red-400 text-lg">-{formatCurrency('$500.00', currentLanguage)}</p>
                     </motion.div>
                   </div>
                 </div>
